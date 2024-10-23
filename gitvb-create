@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+x="$(pwd)"
 MAIN_BRANCH="master"
 
 if [ "$1" == "" ]; then
@@ -10,9 +11,9 @@ fi
 
 newBranch="$1"
 
-gitvb-wip
+$x/gitvb-wip
 git checkout -b "$newBranch"
 git push -u origin "$newBranch"
 git checkout $MAIN_BRANCH
-gitvb-pick "$newBranch"
-gitvb-wip-undo
+$x/gitvb-pick "$newBranch"
+$x/gitvb-wip-undo
