@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-x="$(pwd)"
-MAIN_BRANCH="master"
+FN="$(pwd)"
+MAIN_BRANCH="main"
+
+# todo bail if not on main branch
 
 if [ "$1" == "" ]; then
     echo "usage: gitvb-create <branch>"
@@ -11,9 +13,10 @@ fi
 
 newBranch="$1"
 
-$x/gitvb-wip
+$FN/gitvb-wip
 git checkout -b "$newBranch"
+$FN/gitvb-wip-undo --hard
 git push -u origin "$newBranch"
 git checkout $MAIN_BRANCH
-$x/gitvb-pick "$newBranch"
-$x/gitvb-wip-undo
+$FN/gitvb-wip-undo
+# $x/gitvb-pick "$newBranch"

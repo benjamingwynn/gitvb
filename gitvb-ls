@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+
+#  > find all the .gitvb files in the .gitvb directory
+mkdir -p "$GITVB_HOME"
+found="$(find "$GITVB_HOME" -name '*.gitvb')"
+# echo $found
+picked="${found//$GITVB_HOME/}"
+picked2="${picked////}"
+picked3="${picked2//.gitvb/}"
+# picked2="${picked//".gitvb"/}"
+echo $picked3

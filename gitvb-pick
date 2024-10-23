@@ -2,6 +2,7 @@
 set -e
 
 GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="main"
 
 if [ "$1" == "" ]; then
     echo "usage: gitvb-pick <branch>"
@@ -21,13 +22,18 @@ mkdir -p "$(dirname "$newVbFilePath")"
 # 1. record our current hash
 currentHash=$(git rev-parse HEAD)
 # 2. get each commit hash on the target branch
-commitsToApply=$(git log master..$pickBranch --pretty=format:"%H" --reverse)
+commitsToApply=$(git log $MAIN_BRANCH..$pickBranch --pretty=format:"%H" --reverse)
 # 3. for each hash
     # - cherry-pick the hash
     # - record it on success
 
 echo "base=$currentHash" > $newVbFilePath
 printf "applied=" >> $newVbFilePath
+
+if [ -z "$commitsToApply" ]; then
+    echo 'this branch does not yet differ, applied anyway'
+    exit 0
+fi
 
 while IFS= read -r line; do
     echo "applying $line"
