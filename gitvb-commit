@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-commit <branch>"
+    exit 1
+fi
+
+commitBranch="$1"
+
+# 0. bail if branch not picked
+# 1. git commit
+# 2. write the commit hash to the gitvb file
+# 3. wip commit if any unstaged files changed
+# 4. checkout to target branch
+# 5. cherry pick commit id over
+# 6. checkout back to master

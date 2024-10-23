@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+WIP_TOKEN=">>WIP<<"
+
+# todo: do not continue if there are staged changes
+# todo: only continue if there are (unstaged) changes
+git add .
+git commit -m "[gitvb] work in progress - bla bla bla
+
+$WIP_TOKEN"

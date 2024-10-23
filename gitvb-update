@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+
+# 0. bail if anything staged
+# 1. fetch
+# 2. wip commit if any unstaged files changed
+# 3. unpick every picked branch
+# 4. checkout each picked branch, and with it rebase on origin/master
+# 5. rebase master on origin/master
+# 6. (re)pick each branch

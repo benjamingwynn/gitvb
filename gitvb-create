@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+MAIN_BRANCH="master"
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-create <branch>"
+    exit 1
+fi
+
+newBranch="$1"
+
+gitvb-wip
+git checkout -b "$newBranch"
+git push -u origin "$newBranch"
+git checkout $MAIN_BRANCH
+gitvb-pick "$newBranch"
+gitvb-wip-undo

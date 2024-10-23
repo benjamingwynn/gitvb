@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+WIP_TOKEN=">>WIP<<"
+
+# todo: only continue if the last commit was a wip commit
+git reset HEAD~1
