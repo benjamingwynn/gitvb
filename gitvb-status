@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAX_REMOTE_LIST=10
+echo "fetching remote..."
+git fetch > /dev/null
+
+
+echo ""
+echo "picked:"
+echo ""
+
+#  > find all the .gitvb files in the .gitvb directory
+mkdir -p "$GITVB_HOME"
+found="$(find "$GITVB_HOME" -name '*.gitvb')"
+# echo $found
+picked="${found//$GITVB_HOME/}"
+# picked2="${picked//".gitvb"/}"
+echo $picked
+
+# > verify all of the applied hashes are applied still
+# > if not, warn
+# git branch --contains 3add3e57a113b1aba30053298ff7f2c6ad3122fa
+
+echo ""
+echo "unpicked:"
+echo ""
+unmergedBranches="$(git branch -a --no-merged HEAD --format='%(refname:short)')"
+branchesOnRemote=$(echo "$unmergedBranches" | grep '^origin/')
+branchesLocal=$(echo "$unmergedBranches" | grep -v '^origin/' || sleep 0)
+#  | sed 's/remotes\/origin\///g'
+
+echo "$branchesLocal"
+# TODO: need to remove picked branches from here ?? ^
+
+echo ""
+echo "available:"
+echo ""
+echo "$branchesOnRemote" | head -n $MAX_REMOTE_LIST
+
+nBranchesOnRemote=$(echo "$branchesOnRemote" | wc -l)
+n2=$(echo "if ($nBranchesOnRemote > $MAX_REMOTE_LIST) $nBranchesOnRemote - $MAX_REMOTE_LIST else 0" | bc)
+
+echo ...and $n2 more
+echo

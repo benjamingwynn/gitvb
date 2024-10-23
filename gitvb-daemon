@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+usage="gitvb-daemon <virtual branch name>"
+
+# 
+# whenever an fs change happens, record it as a commit
+# 

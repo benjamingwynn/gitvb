@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-unpick <branch>"
+    exit 1
+fi
+
+pickBranch="$1"
+vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
+vbFileContents="$(cat "$vbFilePath")"
+
+
+# git config core.abbrev 40 && EDITOR=nano git rebase -i b3eb88d3bc37ce79ed8f1f0cec440d404016da18 && git config --unset core.abbrev

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# $ gitvb pick DOPS-XXXX/feat
+# Now using DOPS-XXXX/feat.
+
+# $ gitvb commit DOPS-XXXX/feat
+# > this marks the commit with [DOPS-XXXX/feat] and puts it on the DOPS-XXXX/feat branch
+
+# $ gitvb status
+# Picked branches:
+# - DOPS-XXXX/feat (https://gitlab.com/podfather/podfather-main/-/compare?from=master&to=DOPS-2316%2Fno-typed-spread)
+# - DOPS-YYYY/feat (https://gitlab.com/podfather/podfather-main/-/compare?from=master&to=DOPS-2316%2Fno-typed-spread)
+#    + 1 unpushed commit
+# - master
+
+# $ gitvb unpick DOPS-XXXX/feat
+# No longer using DOPS-YYYY/feat.
+
+# $ gitvb pull
+# > fetch, for every "merge branch 'TARBRANCH' into 'master'" commits, drop the commits marked [TARBRANCH]
+# fetching master
+# dropping DOPS-XXXX/feat since it's merged into master with a3819d2
+# rebasing ontop of master
+
+# $ gitvb status
+# Picked branches:
+# - master
+# Unpicked branches:
+# - DOPS-YYYY/feat (https://gitlab.com/podfather/podfather-main/-/compare?from=master&to=DOPS-2316%2Fno-typed-spread)
+#    + 1 unpushed commit
+
+# $ gitvb pick DOPS-ZZZZ/feat
+# DOPS-ZZZZ/feat doesn't exist, create it with `gitvb create DOPS-ZZZZ/feat`
+
+# $ gitvb create DOPS-ZZZZ/feat
+
+# $ gitvb commit-undo DOPS-XXXX/feat
+# (undo the previous commit)
+# > reset head~1 here and in the branch
+
+# $ gitvb commit-amend DOPS-XXXX/feat
+# (amends the previous commit)
+

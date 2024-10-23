@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+# 
+# this file will be set as the EDITOR to interactive rebase
+# it will drop stuff
+# 
