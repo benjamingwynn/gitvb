@@ -51,7 +51,7 @@ if [ ! -z "$applied" ]; then
 
     git config core.abbrev 40
     LASTEDITOR="$EDITOR"
-    EDITOR="$(dirname $0)/gitvb-interactive-rebase-inline-editor $commands"
+    EDITOR="$(dirname $0)/gitvb-editor-interactive-rebase $commands"
     git rebase -i "$base"
     EDITOR="$LASTEDITOR"
 

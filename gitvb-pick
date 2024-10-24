@@ -55,7 +55,7 @@ while IFS= read -r line; do
     newCommitMessage="[gitvb:$pickBranch] $(git log -1 --format=%B $line)"
     echo "$newCommitMessage" > /tmp/gitvb-commit
     LASTEDITOR="$EDITOR"
-    EDITOR="gitvb-commit-editor" git cherry-pick -e $line
+    EDITOR="gitvb-editor-commit" git cherry-pick -e $line
     EDITOR="$LASTEDITOR"
     appliedCommitHash="$(git log -1 --format="%H")"
     echo "applied as $appliedCommitHash"
