@@ -36,23 +36,6 @@ gitvb-wip
 echo c
 pickedBranches="$(gitvb-ls)"
 
-# 4. checkout each picked branch, and with it rebase on origin/master
-if [ ! -z "$pickedBranches" ]; then
-    echo d
-    while IFS= read -r line; do
-        echo i will now checkout $line
-        git checkout "$line"
-        # echo i will now pull upstream changes to $line
-        # git pull --ff-only
-        echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
-        git rebase "origin/$MAIN_BRANCH"
-
-    done <<< "$pickedBranches"
-fi
-
-echo e
-git checkout $MAIN_BRANCH
-
 # 3. unpick every picked branch
 if [ ! -z "$pickedBranches" ]; then
     while IFS= read -r line; do
@@ -65,9 +48,24 @@ fi
 echo updating $MAIN_BRANCH
 git pull --rebase
 
+# 4. checkout each picked branch, and with it rebase on origin/master
+if [ ! -z "$pickedBranches" ]; then
+    echo d
+    while IFS= read -r line; do
+        echo i will now checkout $line
+        git checkout "$line"
+        echo i will now pull upstream changes to $line
+        git pull --rebase
+        echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
+        git rebase "origin/$MAIN_BRANCH"
+
+    done <<< "$pickedBranches"
+fi
+
+
 # 6. (re)pick each branch
-
-
+echo e
+git checkout $MAIN_BRANCH
 if [ ! -z "$pickedBranches" ]; then
     echo f
     while IFS= read -r line; do

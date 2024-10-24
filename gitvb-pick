@@ -9,6 +9,11 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
 
 if [ "$1" == "" ]; then
     echo "usage: gitvb-pick <branch>"
@@ -38,7 +43,7 @@ commitsToApply=$(git log --cherry $MAIN_BRANCH...$pickBranch --pretty=format:"%H
     # - record it on success
 
 echo "base=$currentHash" > $newVbFilePath
-printf "applied=" >> $newVbFilePath
+# printf "applied=" >> $newVbFilePath
 
 if [ -z "$commitsToApply" ]; then
     echo 'this branch does not yet differ, applied anyway'
@@ -49,10 +54,12 @@ while IFS= read -r line; do
     echo "applying $line"
     newCommitMessage="[gitvb:$pickBranch] $(git log -1 --format=%B $line)"
     echo "$newCommitMessage" > /tmp/gitvb-commit
+    LASTEDITOR="$EDITOR"
     EDITOR="gitvb-commit-editor" git cherry-pick -e $line
+    EDITOR="$LASTEDITOR"
     appliedCommitHash="$(git log -1 --format="%H")"
     echo "applied as $appliedCommitHash"
-    echo "$appliedCommitHash" >> $newVbFilePath
+    # echo "$appliedCommitHash" >> $newVbFilePath
 done <<< "$commitsToApply"
 
 echo ""

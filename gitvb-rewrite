@@ -1,0 +1,42 @@
+
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-rebase <branch>"
+    exit 1
+fi
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+pickBranch="$1"
+
+vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
+if [ ! -f "$vbFilePath" ]; then
+    echo "$pickBranch has not been picked"
+    exit 2
+fi
+
+base="origin/$MAIN_BRANCH"
+
+gitvb-wip
+gitvb-unpick "$pickBranch"
+echo "unpick success!!!"
+git checkout "$pickBranch"
+echo "about to rebase for real...."
+git rebase -i $base
+echo "rebase done!!"
+git checkout "$MAIN_BRANCH"
+gitvb-pick "$pickBranch"
+gitvb-wip-undo

@@ -2,9 +2,20 @@
 set -e
 
 GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ "$1" == "" ]; then
     echo "usage: gitvb-unpick <branch>"
+    exit 1
+fi
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
     exit 1
 fi
 
@@ -21,8 +32,8 @@ fi
 base=$(awk -F'=' '/^base=/ {print $2}' $vbFilePath)
 
 # Extract bar value (from bar= to the end of the file)
-applied=$(awk '/^applied=/{flag=1; sub(/^applied=/,""); print; next} flag' "$vbFilePath")
-
+# applied=$(awk '/^applied=/{flag=1; sub(/^applied=/,""); print; next} flag' "$vbFilePath")
+applied="$(git log --pretty=format:"%H %s" | fgrep "[gitvb:$pickBranch]" | awk '{print $1}')"
 
 # git config core.abbrev 40 && EDITOR=nano git rebase -i b3eb88d3bc37ce79ed8f1f0cec440d404016da18 && git config --unset core.abbrev
 echo "base:"
@@ -38,8 +49,11 @@ if [ ! -z "$applied" ]; then
     echo "the commands: $commands"
     echo "firing interactive rebase"
 
-    git config core.abbrev 40 
-    EDITOR="$(dirname $0)/gitvb-interactive-rebase-inline-editor $commands" git rebase -i "$base"
+    git config core.abbrev 40
+    LASTEDITOR="$EDITOR"
+    EDITOR="$(dirname $0)/gitvb-interactive-rebase-inline-editor $commands"
+    git rebase -i "$base"
+    EDITOR="$LASTEDITOR"
 
     # todo fire this on fail too
     git config --unset core.abbrev
