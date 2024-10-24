@@ -2,43 +2,36 @@
 set -e
 
 GITVB_HOME="./.git/.gitvb-v0"
-FN="$(pwd)"
-MAIN_BRANCH="main"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+WIP_TOKEN=">>WIP<<"
 
-MAX_REMOTE_LIST=10
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
 
-echo "fetching remote..."
-git fetch > /dev/null
+if [[ "$(git log -1 --pretty=%B)" == *"$WIP_TOKEN" ]]; then
+    echo "WARNING: you have at least 1 WIP commit"
+fi
 
 
 echo ""
 echo "picked:"
 echo ""
 
-$FN/gitvb-ls
+gitvb-ls
 
 # > verify all of the applied hashes are applied still
 # > if not, warn
 # git branch --contains 3add3e57a113b1aba30053298ff7f2c6ad3122fa
 
 echo ""
-echo "unpicked:"
+echo "available:"
 echo ""
-unmergedBranches="$(git branch -a --no-merged HEAD --format='%(refname:short)')"
-branchesOnRemote=$(echo "$unmergedBranches" | grep '^origin/' || echo)
-branchesLocal=$(echo "$unmergedBranches" | grep -v '^origin/' || echo)
+# --no-merged HEAD 
+branches="$(git branch -a --format='%(refname:short)' | sed "s/$MAIN_BRANCH//g")"
+branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo "none")
 #  | sed 's/remotes\/origin\///g'
 
 echo "$branchesLocal"
-# TODO: need to remove picked branches from here ?? ^
-
-echo ""
-echo "available:"
-echo ""
-echo "$branchesOnRemote" | head -n $MAX_REMOTE_LIST
-
-nBranchesOnRemote=$(echo "$branchesOnRemote" | wc -l)
-n2=$(echo "if ($nBranchesOnRemote > $MAX_REMOTE_LIST) $nBranchesOnRemote - $MAX_REMOTE_LIST else 0" | bc)
-
-echo ...and $n2 more
 echo

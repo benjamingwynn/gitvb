@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+MAX_REMOTE_LIST=30
+
+git fetch --progress
+
+set -e
+echo ""
+echo "remotely available:"
+echo ""
+unmergedBranches="$(git branch -a --no-merged HEAD --format='%(refname:short)')"
+branchesOnRemote=$(echo "$unmergedBranches" | grep '^origin/' || echo)
+echo "$branchesOnRemote" | head -n $MAX_REMOTE_LIST | sed "s/origin\///"
+nBranchesOnRemote=$(echo "$branchesOnRemote" | wc -l)
+n2=$(echo "if ($nBranchesOnRemote > $MAX_REMOTE_LIST) $nBranchesOnRemote - $MAX_REMOTE_LIST else 0" | bc)
+
+echo ...and $n2 more
+echo 

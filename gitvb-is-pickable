@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+# Check if the branch name is provided
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <branch-name>"
+  exit 1
+fi
+
+BRANCH_NAME=$1
+
+# Check out the branch
+# git checkout "$BRANCH_NAME" 
+
+# Get the latest commits for the branch and origin/master
+LOCAL_COMMITS=$(git rev-list --count "$BRANCH_NAME" ^"origin/$MAIN_BRANCH")
+REMOTE_COMMITS=$(git rev-list --count "origin/$MAIN_BRANCH" ^"$BRANCH_NAME")
+
+# Determine if the branch needs rebasing
+if [ "$REMOTE_COMMITS" -gt 0 ]; then
+  echo ""
+  echo "*** Branch '$BRANCH_NAME' needs rebasing on 'origin/$MAIN_BRANCH'. ***"
+  echo "      run $ gitvb-remote-rebase $BRANCH_NAME"
+  echo "      or rebase it manually."
+  echo ""
+  exit 1
+else
+  echo "Branch '$BRANCH_NAME' is up-to-date with 'origin/$MAIN_BRANCH' or does not need rebasing."
+  exit 0
+fi

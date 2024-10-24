@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if ! git diff --cached --quiet; then
+    echo "There are staged changes. Exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-remote-rebase <branch>"
+    exit 1
+fi
+pickBranch="$1"
+
+vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
+
+if [ -f "$vbFilePath" ]; then
+    echo "cannot rebase picked branch $pickBranch"
+    exit 2
+fi
+
+gitvb-wip
+git fetch --progress
+git checkout "$pickBranch"
+git pull
+git rebase origin/$MAIN_BRANCH
+if [ "$(git branch --show-current)" != "$pickBranch" ]; then
+    echo "somehow not on '$pickBranch' - bailing before force pushing and causing damage!"
+    exit 17
+fi
+git push --force-with-lease
+git checkout $MAIN_BRANCH
+gitvb-wip-undo

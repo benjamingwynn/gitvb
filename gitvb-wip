@@ -4,8 +4,8 @@ set -e
 WIP_TOKEN=">>WIP<<"
 
 # todo: do not continue if there are staged changes
-# todo: only continue if there are (unstaged) changes
+echo "wip" >> .wip
 git add .
-git commit -m "[gitvb] work in progress - bla bla bla
+git commit -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+')
 
 $WIP_TOKEN"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+git checkout $MAIN_BRANCH
+git reset --hard origin/$MAIN_BRANCH
+rm -rfv "$GITVB_HOME"
+echo "removed all gitvb files and reset back to origin"
+echo "your work may be lost"

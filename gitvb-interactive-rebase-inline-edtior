@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-set -e
-
-# for as the editor of `git rebase -i`
-# usage: gitvb-interactive-rebase-inline-edtior "drop commithash" "reword commithash" "<path>"

@@ -3,5 +3,17 @@ set -e
 
 WIP_TOKEN=">>WIP<<"
 
-# todo: only continue if the last commit was a wip commit
+# Get the last commit message
+commit_message=$(git log -1 --pretty=%B)
+
+# Check if the commit message ends with the specified word
+if [[ "$commit_message" == *"$WIP_TOKEN" ]]; then
+    echo "Undoing WIP commit..."
+else
+    echo "The last commit message does not end with the word '$WIP_TOKEN'."
+    exit 1
+fi
+
 git reset HEAD~1 $@
+rm .wip
+git status

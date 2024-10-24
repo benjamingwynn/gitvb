@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-FN="$(pwd)"
-MAIN_BRANCH="main"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 # todo bail if not on main branch
 
@@ -13,10 +12,11 @@ fi
 
 newBranch="$1"
 
-$FN/gitvb-wip
+gitvb-wip
+# todo: safely branch from remote instead
 git checkout -b "$newBranch"
-$FN/gitvb-wip-undo --hard
+gitvb-wip-undo --hard
 git push -u origin "$newBranch"
 git checkout $MAIN_BRANCH
-$FN/gitvb-wip-undo
+gitvb-wip-undo
 # $x/gitvb-pick "$newBranch"

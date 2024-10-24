@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -e
+
+# for as the editor of `git rebase -i`
+# usage: gitvb-interactive-rebase-inline-edtior "drop commithash" "reword commithash" "<path>"
+echo "(start of editor)"
+echo "arguments: $@"
+last_arg="${@: -1}"  # Get the last argument
+echo "The last argument is: $last_arg"
+
+file_path="$last_arg"
+
+echo "run program:"
+# Loop through all arguments except the last one (file path)
+for arg in "$@"; do
+    if [ "$arg" == "$last_arg" ]; then
+        continue
+    fi
+
+    # Extract command and hash
+    command=$(echo "$arg" | awk '{print $1}')
+    hash=$(echo "$arg" | awk '{print $2}')
+
+    # Create the search and replace strings
+    search_string="pick $hash"
+    replace_string="$command $hash"
+
+    echo "a! $search_string"
+    echo "b! $replace_string"
+
+    # Replace the string in the file
+    sed -i '' "s/$search_string/$replace_string/g" "$file_path"
+done
+
+echo "(end of editor)"

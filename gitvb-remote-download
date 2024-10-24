@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if ! git diff --cached --quiet; then
+    echo "There are staged changes. Exiting."
+    exit 1
+fi
+
+if ! git diff --quiet; then
+    echo "There are unstaged changes. Exiting."
+    exit 1
+fi
+
+git fetch --progress
+gitvb-wip
+git checkout "$1"
+git pull
+git checkout "$MAIN_BRANCH"
+gitvb-wip-undo

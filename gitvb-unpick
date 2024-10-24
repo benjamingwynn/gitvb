@@ -10,7 +10,45 @@ fi
 
 pickBranch="$1"
 vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
-vbFileContents="$(cat "$vbFilePath")"
+
+if [ ! -f "$vbFilePath" ]; then
+    echo "not picked $pickBranch"
+    exit 2
+fi
+# vbFileContents="$(cat "$vbFilePath")"
+
+# Extract foo value (single line)
+base=$(awk -F'=' '/^base=/ {print $2}' $vbFilePath)
+
+# Extract bar value (from bar= to the end of the file)
+applied=$(awk '/^applied=/{flag=1; sub(/^applied=/,""); print; next} flag' "$vbFilePath")
 
 
 # git config core.abbrev 40 && EDITOR=nano git rebase -i b3eb88d3bc37ce79ed8f1f0cec440d404016da18 && git config --unset core.abbrev
+echo "base:"
+echo "$base"
+echo "applied:"
+echo "$applied"
+
+
+if [ ! -z "$applied" ]; then
+    # commands=$(echo "$applied" | sed "s/^/drop /" | sed "s/'/'\\\\''/g" | awk '{printf "'\''%s'\'' ", $0}' | tr '\n' ' ')
+    commands=$(echo "$applied"| sed "s/^/drop /" | sed 's/.*/"&"/'  | tr '\n' ' ')
+
+    echo "the commands: $commands"
+    echo "firing interactive rebase"
+
+    git config core.abbrev 40 
+    EDITOR="$(dirname $0)/gitvb-interactive-rebase-inline-editor $commands" git rebase -i "$base"
+
+    # todo fire this on fail too
+    git config --unset core.abbrev
+
+else
+    echo "none applied to undo"
+fi
+
+rm -v "$vbFilePath"
+
+
+echo "succesfully unpicked $pickBranch"

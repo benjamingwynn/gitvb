@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if ! git diff --cached --quiet; then
+    echo "There are staged changes. Exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+# 0. bail if anything staged
+# 1. fetch
+echo a
+git fetch --progress
+echo b
+# 2. wip commit if any unstaged files changed
+gitvb-wip
+echo c
+pickedBranches="$(gitvb-ls)"
+
+# 4. checkout each picked branch, and with it rebase on origin/master
+if [ ! -z "$pickedBranches" ]; then
+    echo d
+    while IFS= read -r line; do
+        echo i will now checkout $line
+        git checkout "$line"
+        echo i will now pull changes to $line
+        git pull --rebase
+        echo i will now updated changes to $line with changes from $MAIN_BRANCH
+        git rebase "$MAIN_BRANCH"
+
+    done <<< "$pickedBranches"
+fi
+
+echo e
+git checkout $MAIN_BRANCH
+
+# 3. unpick every picked branch
+if [ ! -z "$pickedBranches" ]; then
+    while IFS= read -r line; do
+        echo i will now unpick $line
+        gitvb-unpick $line
+    done <<< "$pickedBranches"
+fi
+
+# 5. rebase master on origin/master
+echo updating $MAIN_BRANCH
+git pull --rebase
+
+# 6. (re)pick each branch
+
+
+if [ ! -z "$pickedBranches" ]; then
+    echo f
+    while IFS= read -r line; do
+        echo i will now re-pick $line
+        gitvb-pick $line
+    done <<< "$pickedBranches"
+fi
+
+echo g
+
+# 7. undo wip
+gitvb-wip-undo
