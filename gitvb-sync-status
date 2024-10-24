@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+echo
+echo "(fetching)"
+git fetch --progress
+echo
+nBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
+if [ "$nBehind" != "0" ]; then
+    echo "your branches are $nBehind commits behind upstream"
+    echo "   resync $MAIN_BRANCH and your picked branches with $ gitvb-resync"
+    echo
+    exit 14
+else
+    echo "up-to-date with the latest changes from upstream"
+    echo
+    exit 0
+fi

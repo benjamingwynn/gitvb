@@ -3,7 +3,7 @@ set -e
 
 MAX_REMOTE_LIST=30
 
-git fetch --progress
+# git fetch --progress
 
 set -e
 echo ""

@@ -1,19 +1,66 @@
 #!/usr/bin/env bash
 set -e
 
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
 WIP_TOKEN=">>WIP<<"
 
-# Get the last commit message
-commit_message=$(git log -1 --pretty=%B)
 
-# Check if the commit message ends with the specified word
-if [[ "$commit_message" == *"$WIP_TOKEN" ]]; then
-    echo "Undoing WIP commit..."
-else
-    echo "The last commit message does not end with the word '$WIP_TOKEN'."
-    exit 1
+# Get the list of stashes and their indices
+stash_list=$(git stash list)
+
+# Check if there are any stashes
+if [ -z "$stash_list" ]; then
+    echo "No stashes found."
+    git status
+    exit 0
 fi
 
-git reset HEAD~1 $@
-rm .wip
+while true; do
+    # Find the stash index with the token
+    stash_index=$(git stash list | grep "$WIP_TOKEN" | head -n 1 | awk '{print $1}' | sed 's/:$//')
+
+    # If no matching stash is found, break the loop
+    if [ -z "$stash_index" ]; then
+        echo "No more stashes with the token '$WIP_TOKEN' found."
+        break
+    fi
+
+    echo "Popping stash: $stash_index"
+    git stash pop "$stash_index"
+done
+
+# if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+#     echo "you are not on the main branch: $MAIN_BRANCH"
+#     exit 1
+# fi
+
+# commits=$(git log --pretty=format:"%H %s origin/$MAIN_BRANCH..$MAIN_BRANCH")
+
+# # Loop through each commit
+# while read -r commit; do
+#     # Extract the hash and the message
+#     hash=$(echo "$commit" | awk '{print $1}')
+#     message=$(echo "$commit" | cut -d' ' -f2-)
+
+#     # Check if the message ends with the specified token
+#     if [[ "$message" == *"$WIP_TOKEN" ]]; then
+#         echo "Reverting commit: $hash - $message"
+#         command="drop $hash"
+#         EDITOR="gitvb-interactive-rebase-inline-editor $command" git rebase -i "origin/$MAIN_BRANCH"
+#     fi
+# done <<< "$commits"
+
+# Get the last commit message
+# commit_message=$(git log -1 --pretty=%B)
+
+# Check if the commit message ends with the specified word
+# if [[ "$commit_message" == *"$WIP_TOKEN" ]]; then
+#     echo "Undoing WIP commit..."
+# else
+#     echo "The last commit message does not end with the word '$WIP_TOKEN'."
+#     exit 1
+# fi
+
+# git reset HEAD~1 $@
 git status
+

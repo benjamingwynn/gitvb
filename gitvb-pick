@@ -25,13 +25,14 @@ fi
 
 mkdir -p "$(dirname "$newVbFilePath")"
 
-# todo: we can only pick branches which are up to date
+# we can only pick branches that are up to date
 gitvb-is-pickable $pickBranch
 
 # 1. record our current hash
-currentHash=$(git rev-parse HEAD)
+currentHash=$(git rev-parse "origin/$MAIN_BRANCH")
+echo "setting base as = $currentHash"
 # 2. get each commit hash on the target branch
-commitsToApply=$(git log --cherry-pick $MAIN_BRANCH...$pickBranch --pretty=format:"%H" --reverse)
+commitsToApply=$(git log --cherry $MAIN_BRANCH...$pickBranch --pretty=format:"%H" --reverse)
 # 3. for each hash
     # - cherry-pick the hash
     # - record it on success
@@ -46,10 +47,14 @@ fi
 
 while IFS= read -r line; do
     echo "applying $line"
-    git cherry-pick $line
-    appliedCommitHash=$(git log -1 --format="%H")
+    newCommitMessage="[gitvb:$pickBranch] $(git log -1 --format=%B $line)"
+    echo "$newCommitMessage" > /tmp/gitvb-commit
+    EDITOR="gitvb-commit-editor" git cherry-pick -e $line
+    appliedCommitHash="$(git log -1 --format="%H")"
     echo "applied as $appliedCommitHash"
     echo "$appliedCommitHash" >> $newVbFilePath
 done <<< "$commitsToApply"
 
+echo ""
 echo "succesfully picked $pickBranch"
+echo ""

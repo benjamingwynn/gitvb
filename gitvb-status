@@ -10,10 +10,6 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-if [[ "$(git log -1 --pretty=%B)" == *"$WIP_TOKEN" ]]; then
-    echo "WARNING: you have at least 1 WIP commit"
-fi
-
 
 echo ""
 echo "picked:"
@@ -29,8 +25,8 @@ echo ""
 echo "available:"
 echo ""
 # --no-merged HEAD 
-branches="$(git branch -a --format='%(refname:short)' | sed "s/$MAIN_BRANCH//g")"
-branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo "none")
+branches="$(git branch -a --format='%(refname:short)' | grep -v "^$MAIN_BRANCH$")"
+branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo)
 #  | sed 's/remotes\/origin\///g'
 
 echo "$branchesLocal"

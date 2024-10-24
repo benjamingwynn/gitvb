@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+# literally just copies the contents of /tmp/gitvb-commit into the argument provided as the file
+
+cat /tmp/gitvb-commit > "${@: -1}"
+exit 0

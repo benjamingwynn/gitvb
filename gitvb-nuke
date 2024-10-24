@@ -4,8 +4,12 @@ set -e
 GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
+gitvb-wip-undo
 git checkout $MAIN_BRANCH
 git reset --hard origin/$MAIN_BRANCH
 rm -rfv "$GITVB_HOME"
+git status
+echo
 echo "removed all gitvb files and reset back to origin"
 echo "your work may be lost"
+echo

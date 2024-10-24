@@ -31,5 +31,9 @@ for arg in "$@"; do
     # Replace the string in the file
     sed -i '' "s/$search_string/$replace_string/g" "$file_path"
 done
+echo "(file dump)"
+cat "$file_path"
+echo "(eof)"
+
 
 echo "(end of editor)"

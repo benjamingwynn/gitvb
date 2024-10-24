@@ -3,6 +3,16 @@ set -e
 
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
+if ! git diff --cached --quiet; then
+    echo "There are staged changes. Exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
 # todo bail if not on main branch
 
 if [ "$1" == "" ]; then

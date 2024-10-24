@@ -15,7 +15,7 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
 fi
 
 if [ "$1" == "" ]; then
-    echo "usage: gitvb-remote-rebase <branch>"
+    echo "usage: gitvb-resync-unpicked <branch>"
     exit 1
 fi
 pickBranch="$1"
@@ -30,12 +30,17 @@ fi
 gitvb-wip
 git fetch --progress
 git checkout "$pickBranch"
-git pull
+git pull --ff-only
 git rebase origin/$MAIN_BRANCH
 if [ "$(git branch --show-current)" != "$pickBranch" ]; then
     echo "somehow not on '$pickBranch' - bailing before force pushing and causing damage!"
     exit 17
 fi
-git push --force-with-lease
+# git push --force-with-lease
 git checkout $MAIN_BRANCH
 gitvb-wip-undo
+
+echo
+echo "$pickBranch has been resynced with origin/$MAIN_BRANCH succesfully"
+echo "it can now be picked with $ gitvb-pick $pickBranch"
+echo

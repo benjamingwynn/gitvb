@@ -16,8 +16,20 @@ fi
 
 # 0. bail if anything staged
 # 1. fetch
-echo a
+# echo a
+# git fetch --progress
+echo
+echo "(fetching)"
 git fetch --progress
+
+# nBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
+# if [ "$nBehind" == "0" ]; then
+#     echo
+#     echo "you are up to date already. no work needs to be done."
+#     echo
+#     exit 18
+# fi
+
 echo b
 # 2. wip commit if any unstaged files changed
 gitvb-wip
@@ -30,10 +42,10 @@ if [ ! -z "$pickedBranches" ]; then
     while IFS= read -r line; do
         echo i will now checkout $line
         git checkout "$line"
-        echo i will now pull changes to $line
-        git pull --rebase
-        echo i will now updated changes to $line with changes from $MAIN_BRANCH
-        git rebase "$MAIN_BRANCH"
+        # echo i will now pull upstream changes to $line
+        # git pull --ff-only
+        echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
+        git rebase "origin/$MAIN_BRANCH"
 
     done <<< "$pickedBranches"
 fi
@@ -68,3 +80,7 @@ echo g
 
 # 7. undo wip
 gitvb-wip-undo
+
+echo ""
+echo "everything is now up to date"
+echo ""

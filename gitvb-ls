@@ -11,4 +11,6 @@ picked="${found//$GITVB_HOME/}"
 # picked2="${picked////}"
 picked3="${picked//.gitvb/}"
 # picked2="${picked//".gitvb"/}"
-printf "$($picked3 | sed 's/^.//')"
+if [ ! -z "$picked3" ]; then
+    printf "$picked3\n" | sed 's/^.//'
+fi
