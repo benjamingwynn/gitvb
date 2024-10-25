@@ -3,4 +3,4 @@ set -e
 
 WIP_TOKEN=">>WIP<<"
 
-git stash --all -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+') $WIP_TOKEN"
+git stash --include-untracked -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+') $WIP_TOKEN"

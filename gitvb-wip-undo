@@ -11,7 +11,6 @@ stash_list=$(git stash list)
 # Check if there are any stashes
 if [ -z "$stash_list" ]; then
     echo "No stashes found."
-    git status
     exit 0
 fi
 
@@ -62,5 +61,4 @@ done
 # fi
 
 # git reset HEAD~1 $@
-git status
 

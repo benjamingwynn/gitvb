@@ -11,6 +11,7 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
 fi
 
 
+echo "on branch $MAIN_BRANCH"
 echo ""
 echo "picked:"
 echo ""

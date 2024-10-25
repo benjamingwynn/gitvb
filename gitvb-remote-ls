@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
 MAX_REMOTE_LIST=30
 
 # git fetch --progress
@@ -9,8 +10,9 @@ set -e
 echo ""
 echo "remotely available:"
 echo ""
-unmergedBranches="$(git branch -a --no-merged HEAD --format='%(refname:short)')"
-branchesOnRemote=$(echo "$unmergedBranches" | grep '^origin/' || echo)
+# --no-merged HEAD 
+unmergedBranches="$(git branch -a --format='%(refname:short)')"
+branchesOnRemote=$(echo "$unmergedBranches" | grep '^origin/' | grep -Ev "origin/($MAIN_BRANCH|HEAD)" || echo)
 echo "$branchesOnRemote" | head -n $MAX_REMOTE_LIST | sed "s/origin\///"
 nBranchesOnRemote=$(echo "$branchesOnRemote" | wc -l)
 n2=$(echo "if ($nBranchesOnRemote > $MAX_REMOTE_LIST) $nBranchesOnRemote - $MAX_REMOTE_LIST else 0" | bc)
