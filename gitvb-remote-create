@@ -28,3 +28,12 @@ git push -u origin "$newBranch"
 git checkout "$MAIN_BRANCH"
 gitvb-wip-undo
 # $x/gitvb-pick "$newBranch"
+
+
+echo
+echo "succesfully created $newBranch and uploaded it to origin!"
+echo "  you can pick it by running"
+echo "  $ gitvb-pick $newBranch"
+echo
+echo "  you can create an MR/PR using the link provided by the remote above"
+echo

@@ -64,5 +64,6 @@ fi
 
 rm -v "$vbFilePath"
 
-
+echo
 echo "succesfully unpicked $pickBranch"
+echo
