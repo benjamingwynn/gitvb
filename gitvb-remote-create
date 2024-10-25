@@ -21,10 +21,10 @@ fi
 newBranch="$1"
 
 gitvb-wip
-# todo: safely branch from remote instead
+git checkout "origin/$MAIN_BRANCH"
 git checkout -b "$newBranch"
 gitvb-wip-undo --hard
 git push -u origin "$newBranch"
-git checkout $MAIN_BRANCH
+git checkout "$MAIN_BRANCH"
 gitvb-wip-undo
 # $x/gitvb-pick "$newBranch"
