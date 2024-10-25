@@ -10,13 +10,69 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "you have staged changes."
+    echo "  commit with $ gitvb-commit <branch>."
+    echo ""
+fi
 
 echo "on branch $MAIN_BRANCH"
 echo ""
 echo "picked:"
 echo ""
 
-gitvb-ls
+pickedBranches="$(gitvb-ls)"
+publishBranches=""
+canPublish=false
+
+if [ ! -z "$pickedBranches" ]; then
+    while IFS= read -r line; do
+        nAhead=$(git rev-list --count origin/$MAIN_BRANCH..$line)
+        nUnpushed=$(git rev-list --count origin/$line..$line)
+        
+        nRemote=$(git rev-list --count "origin/$line" ^"$line")
+
+        nCommits=$(echo "$nAhead - $nRemote" | bc)
+
+        # -$nBehind : 
+        printf "$line [$nAhead commits, "
+
+
+        if [ "$nRemote" != "0" ]; then
+            printf "needs rebasing]"
+            canPublish=true
+            publishBranches="$publishBranches
+$line"
+        else
+            printf "$nUnpushed behind remote]"
+            if [ "$nUnpushed" != "0" ]; then
+                canPublish=true
+                publishBranches="$publishBranches
+$line"
+            fi
+        fi
+        # printf " nRemote=$nRemote nAhead=$nRemote"
+        echo ""
+    done <<< "$pickedBranches"
+fi
+
+# if [ "$canPublish" ]; then
+#     echo "publish your changes with"
+#     echo " $ gitvb-publish <picked branch>"
+# fi
+
+
+if [ ! -z "$publishBranches" ]; then
+    echo
+    echo "upstream your changes with"
+
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            continue
+        fi
+        echo " $ gitvb-publish $line"
+    done <<< "$publishBranches"
+fi
 
 # > verify all of the applied hashes are applied still
 # > if not, warn
