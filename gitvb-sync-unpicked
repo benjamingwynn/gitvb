@@ -15,7 +15,7 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
 fi
 
 if [ "$1" == "" ]; then
-    echo "usage: gitvb-resync-unpicked <branch>"
+    echo "usage: gitvb-sync-unpicked <branch>"
     exit 1
 fi
 pickBranch="$1"
