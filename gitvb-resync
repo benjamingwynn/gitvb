@@ -48,16 +48,35 @@ fi
 echo updating $MAIN_BRANCH
 git pull --rebase
 
+repickBranches=""
+
 # 4. checkout each picked branch, and with it rebase on origin/master
 if [ ! -z "$pickedBranches" ]; then
     echo d
     while IFS= read -r line; do
         echo i will now checkout $line
         git checkout "$line"
-        echo i will now pull upstream changes to $line
-        git pull --rebase
-        echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
-        git rebase "origin/$MAIN_BRANCH"
+
+        # determine if the branch was merged into main with the original branch deleted
+        # in this case, we should cleanup our local branch and not repick it
+        if [ ! -z "$(git ls-remote --heads origin $line)" ]; then
+            echo "Ref exists."
+
+            echo i will now pull upstream changes to $line
+            git pull --rebase
+            echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
+            git rebase "origin/$MAIN_BRANCH"
+            repickBranches="$repickBranches
+$line"
+        else
+            echo
+            echo "!! REMOVE REFERENCE IS GONE !!"
+            echo
+            git checkout "$MAIN_BRANCH"
+            echo "removing branch since the remote is gone"
+            git branch -D $line
+        fi
+
 
     done <<< "$pickedBranches"
 fi
@@ -66,12 +85,14 @@ fi
 # 6. (re)pick each branch
 echo e
 git checkout $MAIN_BRANCH
-if [ ! -z "$pickedBranches" ]; then
+if [ ! -z "$repickBranches" ]; then
     echo f
     while IFS= read -r line; do
-        echo i will now re-pick $line
-        gitvb-pick $line
-    done <<< "$pickedBranches"
+        if [ ! -z "$line" ]; then
+            echo i will now re-pick $line
+            gitvb-pick $line
+        fi
+    done <<< "$repickBranches"
 fi
 
 echo g

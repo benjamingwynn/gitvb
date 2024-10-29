@@ -27,6 +27,15 @@ if [ -f "$vbFilePath" ]; then
     exit 2
 fi
 
+if [ -z "$(git ls-remote --heads origin $pickBranch)" ]; then
+    echo
+    echo "*** The branch '$pickBranch' does not exist on the remote."
+    echo "      Cannot safely pick this branch. It was probably merged then deleted."
+    echo "      Cleanup by running $ git branch -D $pickBranch"
+    echo
+    exit 4
+fi
+
 gitvb-wip
 git fetch --progress
 git checkout "$pickBranch"

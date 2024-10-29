@@ -29,23 +29,30 @@ if [ ! -z "$pickedBranches" ]; then
     while IFS= read -r line; do
         nAhead=$(git rev-list --count origin/$MAIN_BRANCH..$line)
         nUnpushed=$(git rev-list --count origin/$line..$line)
+        nBehind=$(git rev-list --count $line..origin/$line)
         
         nRemote=$(git rev-list --count "origin/$line" ^"$line")
 
         nCommits=$(echo "$nAhead - $nRemote" | bc)
 
         # -$nBehind : 
-        printf "$line [$nAhead commits, "
+        printf "$line [$nAhead commits total, "
 
 
         if [ "$nRemote" != "0" ]; then
-            printf "needs rebasing]"
+            printf "needs publish to rebase upstream]"
             canPublish=true
             publishBranches="$publishBranches
 $line"
         else
-            printf "$nUnpushed behind remote]"
+            printf "$nUnpushed commits not yet published, "
             if [ "$nUnpushed" != "0" ]; then
+                canPublish=true
+                publishBranches="$publishBranches
+$line"
+            fi
+            printf "$nBehind from upstream]"
+            if [ "$nBehind" != "0" ]; then
                 canPublish=true
                 publishBranches="$publishBranches
 $line"
