@@ -28,10 +28,12 @@ if [ ! -f "$vbFilePath" ]; then
     exit 2
 fi
 
-echo
-echo "** need to resync before publishing!"
-echo
-gitvb-resync
+if [ "$2" != "--no-resync" ]; then
+    echo
+    echo "** need to resync before publishing!"
+    echo
+    gitvb-resync
+fi
 
 echo
 echo "** publishing your changes to $publishBranch"

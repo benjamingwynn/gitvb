@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+pickedBranches="$(gitvb-ls)"
+
+echo
+echo "** need to resync before publishing!"
+echo
+gitvb-resync
+
+if [ ! -z "$pickedBranches" ]; then
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            continue
+        fi
+        gitvb-publish "$line" --no-resync
+    done <<< "$pickedBranches"
+fi
