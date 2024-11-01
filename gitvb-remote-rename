@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-create <old branch> <new branch>"
+    exit 1
+fi
+
+
+if [ "$2" == "" ]; then
+    echo "usage: gitvb-create <old branch> <new branch>"
+    exit 1
+fi
+
+oldBranch="$1"
+newBranch="$2"
+
+vbFilePath="$GITVB_HOME/$oldBranch.gitvb"
+
+if [ -f "$vbFilePath" ]; then
+    echo
+    echo "cannot remote move '$oldBranch' since it's picked"
+    echo "unpick it first!"
+    echo
+    exit 2
+fi
+
+nUnpushed=$(git rev-list --count origin/$oldBranch..$oldBranch)
+
+if [ "$nUnpushed" != "0" ]; then
+    echo
+    echo "cannot remote move '$oldBranch' since it has $nUnpushed unpushed changes"
+    echo
+    exit 3
+fi
+
+
+echo "remote-mv: wip"
+gitvb-wip remote-mv
+
+echo "remote-mv: checking out '$oldBranch'"
+git checkout origin/$oldBranch
+
+echo "remote-mv: creating new branch '$newBranch'"
+git branch $newBranch
+
+echo "remote-mv: pushing"
+git push -u origin $newBranch
+
+echo "remote-mv: delete old branch '$oldBranch' from local"
+git branch -D $oldBranch
+
+echo "remote-mv: delete old branch '$oldBranch' from remote"
+git push -d origin $oldBranch
+
+echo "remote-mv: checkout out master"
+git checkout "$MAIN_BRANCH"
+
+echo "remote-mv: wip undo"
+gitvb-wip-undo remote-mv
+
+echo
+echo "succesfully renamed $oldBranch to $newBranch on origin!"
+echo "  you can pick it by running"
+echo "  $ gitvb-pick $newBranch"
+echo
