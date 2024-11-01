@@ -4,6 +4,9 @@ set -e
 GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
+echo this is deprecated
+exit 1
+
 echo
 echo "(fetching)"
 git fetch --progress

@@ -26,6 +26,8 @@ if [ ! -f "$vbFilePath" ]; then
     echo "not picked $pickBranch"
     exit 2
 fi
+
+gitvb-wip unpick
 # vbFileContents="$(cat "$vbFilePath")"
 
 # Extract foo value (single line)
@@ -63,6 +65,7 @@ else
 fi
 
 rm -v "$vbFilePath"
+gitvb-wip-undo unpick
 
 echo
 echo "succesfully unpicked $pickBranch"

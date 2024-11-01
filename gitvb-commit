@@ -21,6 +21,14 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
+# REMOTE_COMMITS=$(git rev-list --count "origin/$MAIN_BRANCH" ^"$commitBranch")
+# if [ "$REMOTE_COMMITS" -gt 0 ]; then
+#   echo ""
+#   echo "*** Branch '$BRANCH_NAME' look bad. ***"
+#   echo ""
+#   exit 1
+# fi
+
 vbFilePath="$GITVB_HOME/$commitBranch.gitvb"
 
 if [ ! -f "$vbFilePath" ]; then
@@ -31,7 +39,7 @@ fi
 git commit -v
 # then get previous/last commit id
 addedCommitHash="$(git rev-parse "$MAIN_BRANCH")"
-gitvb-wip
+gitvb-wip commit
 echo "1"
 git checkout "$commitBranch"
 echo "2"
@@ -45,7 +53,7 @@ gitvb-unpick "$commitBranch"
 echo "5"
 gitvb-pick "$commitBranch"
 echo "6"
-gitvb-wip-undo
+gitvb-wip-undo commit
 
 # 0. bail if branch not picked
 # 1. git commit

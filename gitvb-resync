@@ -60,10 +60,11 @@ if [ ! -z "$pickedBranches" ]; then
         # determine if the branch was merged into main with the original branch deleted
         # in this case, we should cleanup our local branch and not repick it
         if [ ! -z "$(git ls-remote --heads origin $line)" ]; then
-            echo "Ref exists."
+            echo "Ref $line exists on the remote."
 
             echo i will now pull upstream changes to $line
             git pull --rebase
+            # git pull --ff-only || echo "nothing to fast-forward"
             echo i will now updated changes to $line with changes from origin/$MAIN_BRANCH
             git rebase "origin/$MAIN_BRANCH"
             repickBranches="$repickBranches

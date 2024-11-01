@@ -28,17 +28,17 @@ if [ ! -f "$vbFilePath" ]; then
     exit 2
 fi
 
-if [ "$2" != "--no-resync" ]; then
-    echo
-    echo "** need to resync before publishing!"
-    echo
-    gitvb-resync
-fi
+# if [ "$2" != "--no-resync" ]; then
+#     echo
+#     echo "** need to resync before publishing!"
+#     echo
+#     gitvb-resync
+# fi
 
 echo
 echo "** publishing your changes to $publishBranch"
 echo
-gitvb-wip
+gitvb-wip publish
 git checkout "$publishBranch"
 
 nRemote=$(git rev-list --count "origin/$publishBranch" ^"$publishBranch")
@@ -54,7 +54,7 @@ else
 fi
 
 git checkout "$MAIN_BRANCH"
-gitvb-wip-undo
+gitvb-wip-undo publish
 
 echo
 echo "** succesfully published to $publishBranch"

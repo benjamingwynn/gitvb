@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-WIP_TOKEN=">>WIP<<"
+WIP_TOKEN=">>WIP<< ${1:-unspecified} >>WIP<<"
 
 git stash --include-untracked -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+') $WIP_TOKEN"

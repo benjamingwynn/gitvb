@@ -20,6 +20,11 @@ fi
 
 newBranch="$1"
 
+if [ ! -z "$(git ls-remote --heads origin $newBranch)" ]; then
+    echo "this branch already exists on the remote"
+    exit 4
+fi
+
 gitvb-wip
 git checkout "origin/$MAIN_BRANCH"
 git checkout -b "$newBranch"

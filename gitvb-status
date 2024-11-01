@@ -10,20 +10,31 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-if [ ! -z "$(git diff --staged)" ]; then
-    echo "you have staged changes."
-    echo "  commit with $ gitvb-commit <branch>."
-    echo ""
+git fetch --progress
+nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
+echo "<$nMainBehind>"
+
+pickedBranches="$(gitvb-ls)"
+if [ -z "$pickedBranches" ]; then
+    nPicked=0
+else
+    nPicked="$(echo "$pickedBranches" | wc -l | xargs)"
 fi
 
+echo ""
 echo "on branch $MAIN_BRANCH"
+echo "you have $nPicked picked branches"
 echo ""
 echo "picked:"
 echo ""
 
-pickedBranches="$(gitvb-ls)"
 publishBranches=""
 canPublish=false
+needResync=false
+
+if [ "$nMainBehind" != "0" ]; then
+    needResync=true
+fi
 
 if [ ! -z "$pickedBranches" ]; then
     while IFS= read -r line; do
@@ -36,22 +47,49 @@ if [ ! -z "$pickedBranches" ]; then
         nCommits=$(echo "$nAhead - $nRemote" | bc)
 
         # -$nBehind : 
-        printf "$line [$nAhead commits total, "
 
+        if [ "$nUnpushed" != "0" ]; then
+        # 🔄
+        # ⚛️
+        # ✳️
+        # ❇️
+            echo -n " ✳️  "
+        else
+            echo -n " 🔄 "
+        fi
+
+        echo -n "[+$nAhead]  $line"
+
+
+        if [ "$nAhead" != "0" ]; then
+            # echo -n " - !"
+            if [ -z "$(git ls-remote --heads origin $newBranch)" ]; then
+                echo -n "- remote gone!!!"
+                needResync=true
+            fi
+        fi
 
         if [ "$nRemote" != "0" ]; then
-            printf "needs publish to rebase upstream]"
+            echo -n " -- needs publish to rebase upstream!"
             canPublish=true
             publishBranches="$publishBranches
 $line"
         else
-            printf "$nUnpushed commits not yet published, "
             if [ "$nUnpushed" != "0" ]; then
+                if [ "$nAhead" == "0" ]; then
+                    echo -n " -- needs publish to rebase upstream!!"
+                else
+                    echo -n " ($nUnpushed to publish)"
+                fi
+
                 canPublish=true
                 publishBranches="$publishBranches
 $line"
+                # echo -n " - $nUnpushed unpublished!"
+            # else
+                # printf "]"
             fi
-            printf "$nBehind from upstream]"
+            # printf "$nBehind from upstream]"
             if [ "$nBehind" != "0" ]; then
                 canPublish=true
                 publishBranches="$publishBranches
@@ -63,10 +101,12 @@ $line"
     done <<< "$pickedBranches"
 fi
 
-# if [ "$canPublish" ]; then
-#     echo "publish your changes with"
-#     echo " $ gitvb-publish <picked branch>"
-# fi
+if [ "$needsResync" ]; then
+    echo ""
+    echo " ⚠️  A remote has gone or there are upstream changes, you must resync!"
+    echo " $ gitvb-resync"
+    echo ""
+fi
 
 
 if [ ! -z "$publishBranches" ]; then
@@ -86,12 +126,54 @@ fi
 # git branch --contains 3add3e57a113b1aba30053298ff7f2c6ad3122fa
 
 echo ""
-echo "available:"
+echo "unpicked:"
 echo ""
 # --no-merged HEAD 
 branches="$(git branch -a --format='%(refname:short)' | grep -v "^$MAIN_BRANCH$")"
-branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo)
+# branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo)
 #  | sed 's/remotes\/origin\///g'
 
-echo "$branchesLocal"
+while IFS= read -r line; do
+    if [ -z "$line" ]; then
+        continue
+    fi
+    branchName=$(echo "$line" | grep -v '^origin/' || echo)
+
+    if [ -z "$branchName" ]; then
+        continue
+    fi
+
+
+    if echo "$pickedBranches" | grep -q "^$line$"; then
+        # echo "The pickedBranches contains '$line'"
+        continue
+    # else
+        # echo "The pickedBranches does not contain '$line'"
+    fi
+
+    nAhead=$(git rev-list --count origin/$MAIN_BRANCH..$line)
+
+    if gitvb-is-pickable "$branchName" &>/dev/null; then
+    # if [ "$needsPublishing" == "1" ]; then
+        echo -n " 🆗 "
+    else 
+        echo -n " ☯️  "
+    fi
+
+    echo "[+$nAhead]  $branchName" #
+    
+done <<< "$branches"
+
+# echo
+# echo "   ✳️  ready to be picked     ☯️  sync required"
+
+# echo "$branchesLocal"
 echo
+
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo ""
+    echo "you have staged changes."
+    echo "  commit with $ gitvb-commit <branch>."
+    echo ""
+fi

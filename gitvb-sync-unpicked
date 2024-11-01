@@ -36,10 +36,10 @@ if [ -z "$(git ls-remote --heads origin $pickBranch)" ]; then
     exit 4
 fi
 
-gitvb-wip
 git fetch --progress
+gitvb-wip unpick-sync
 git checkout "$pickBranch"
-git pull --ff-only
+git pull --rebase
 git rebase origin/$MAIN_BRANCH
 if [ "$(git branch --show-current)" != "$pickBranch" ]; then
     echo "somehow not on '$pickBranch' - bailing before force pushing and causing damage!"
@@ -47,7 +47,7 @@ if [ "$(git branch --show-current)" != "$pickBranch" ]; then
 fi
 # git push --force-with-lease
 git checkout $MAIN_BRANCH
-gitvb-wip-undo
+gitvb-wip-undo unpick-sync
 
 echo
 echo "$pickBranch has been resynced with origin/$MAIN_BRANCH succesfully"

@@ -31,11 +31,17 @@ fi
 mkdir -p "$(dirname "$newVbFilePath")"
 
 # we can only pick branches that are up to date
+echo "pick: fetch"
+git fetch --progress
+echo "pick: is pickable?"
 gitvb-is-pickable $pickBranch
+
+echo "pick: create wip stash"
+gitvb-wip "pick-$pickBranch"
 
 # 1. record our current hash
 currentHash=$(git rev-parse "origin/$MAIN_BRANCH")
-echo "setting base as = $currentHash"
+echo "pick: setting base as = $currentHash"
 # 2. get each commit hash on the target branch
 commitsToApply=$(git log --cherry $MAIN_BRANCH...$pickBranch --pretty=format:"%H" --reverse)
 # 3. for each hash
@@ -46,22 +52,29 @@ echo "base=$currentHash" > $newVbFilePath
 # printf "applied=" >> $newVbFilePath
 
 if [ -z "$commitsToApply" ]; then
-    echo 'this branch does not yet differ, applied anyway'
+    echo 'pick: this branch does not yet differ, applied anyway'
+    echo "pick: undo wip stash"
+    gitvb-wip-undo "pick-$pickBranch"
+    echo ""
+    echo "succesfully picked $pickBranch"
+    echo ""
     exit 0
 fi
 
 while IFS= read -r line; do
-    echo "applying $line"
+    echo "pick: applying $line"
     newCommitMessage="[gitvb:$pickBranch] $(git log -1 --format=%B $line)"
     echo "$newCommitMessage" > /tmp/gitvb-commit
     LASTEDITOR="$EDITOR"
     EDITOR="gitvb-editor-commit" git cherry-pick -e $line
     EDITOR="$LASTEDITOR"
     appliedCommitHash="$(git log -1 --format="%H")"
-    echo "applied as $appliedCommitHash"
+    echo "pick: applied as $appliedCommitHash"
     # echo "$appliedCommitHash" >> $newVbFilePath
 done <<< "$commitsToApply"
 
+echo "pick: undo wip stash"
+gitvb-wip-undo "pick-$pickBranch"
 echo ""
 echo "succesfully picked $pickBranch"
 echo ""

@@ -2,7 +2,7 @@
 set -e
 
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
-WIP_TOKEN=">>WIP<<"
+WIP_TOKEN=">>WIP<< ${1:-unspecified} >>WIP<<"
 
 
 # Get the list of stashes and their indices
