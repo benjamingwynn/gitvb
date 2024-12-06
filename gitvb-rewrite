@@ -30,7 +30,7 @@ fi
 
 base="origin/$MAIN_BRANCH"
 
-gitvb-wip
+gitvb-wip rewrite
 gitvb-unpick "$pickBranch"
 echo "unpick success!!!"
 git checkout "$pickBranch"
@@ -39,4 +39,4 @@ git rebase -i $base
 echo "rebase done!!"
 git checkout "$MAIN_BRANCH"
 gitvb-pick "$pickBranch"
-gitvb-wip-undo
+gitvb-wip-undo rewrite

@@ -32,7 +32,7 @@ git fetch --progress
 
 echo b
 # 2. wip commit if any unstaged files changed
-gitvb-wip
+gitvb-wip resync
 echo c
 pickedBranches="$(gitvb-ls)"
 
@@ -99,8 +99,10 @@ fi
 echo g
 
 # 7. undo wip
-gitvb-wip-undo
+gitvb-wip-undo resync
 
 echo ""
 echo "everything is now up to date"
 echo ""
+
+gitvb-status

@@ -8,9 +8,35 @@ if [ "$1" == "" ]; then
     echo "usage: gitvb-unpick <branch>"
     exit 1
 fi
+pickBranch="$1"
+
 
 if [ ! -z "$(git diff --staged)" ]; then
     echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ ! -z "$(git diff)" ]; then
+    #     --------------------------------------------------------------------------------
+    echo
+    echo "cannot unpick. you have changed tracked files and we don't know which of these"
+    echo "changes should belong to $pickBranch"
+    echo
+    echo "the following tracked files are changed:"
+    echo
+    git diff --name-only
+    echo
+    echo "you have options:"
+    echo
+    echo "  if nothing in your working tree belongs to $pickBranch:"
+    echo 
+    echo "   - stash everything tracked with \`git stash\`"
+    echo 
+    echo "  if you have outstanding changes for $pickBranch:"
+    echo 
+    echo "   - commit them with \`gitvb-commit $pickBranch\`"
+    # echo "     - stash them with \`gitvb-stash $pickBranch\`"
+    echo
     exit 1
 fi
 
@@ -19,7 +45,6 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-pickBranch="$1"
 vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
 
 if [ ! -f "$vbFilePath" ]; then

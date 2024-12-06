@@ -62,3 +62,9 @@ gitvb-wip-undo commit
 # 4. checkout to target branch
 # 5. cherry pick commit id over
 # 6. checkout back to master
+
+echo
+echo "succesfully commited to $commitBranch!"
+echo "  you can upload your changes to the remote by running:"
+echo "  $ gitvb-publish $commitBranch"
+echo

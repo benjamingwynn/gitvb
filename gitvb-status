@@ -12,7 +12,6 @@ fi
 
 git fetch --progress
 nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
-echo "<$nMainBehind>"
 
 pickedBranches="$(gitvb-ls)"
 if [ -z "$pickedBranches" ]; then
@@ -22,8 +21,8 @@ else
 fi
 
 echo ""
-echo "on branch $MAIN_BRANCH"
-echo "you have $nPicked picked branches"
+echo "on the main branch, $MAIN_BRANCH"
+echo "you have $nPicked picked branches, they are $nMainBehind commits behind origin/$MAIN_BRANCH"
 echo ""
 echo "picked:"
 echo ""
@@ -101,24 +100,22 @@ $line"
     done <<< "$pickedBranches"
 fi
 
-if [ "$needsResync" ]; then
+if [ "$needResync" == true ]; then
     echo ""
     echo " ⚠️  A remote has gone or there are upstream changes, you must resync!"
-    echo " $ gitvb-resync"
-    echo ""
-fi
+    echo "    $ gitvb-resync"
+else
+    if [ ! -z "$publishBranches" ]; then
+        echo
+        echo "upstream your changes with"
 
-
-if [ ! -z "$publishBranches" ]; then
-    echo
-    echo "upstream your changes with"
-
-    while IFS= read -r line; do
-        if [ -z "$line" ]; then
-            continue
-        fi
-        echo " $ gitvb-publish $line"
-    done <<< "$publishBranches"
+        while IFS= read -r line; do
+            if [ -z "$line" ]; then
+                continue
+            fi
+            echo " $ gitvb-publish $line"
+        done <<< "$publishBranches"
+    fi
 fi
 
 # > verify all of the applied hashes are applied still
@@ -129,12 +126,16 @@ echo ""
 echo "unpicked:"
 echo ""
 # --no-merged HEAD 
-branches="$(git branch -a --format='%(refname:short)' | grep -v "^$MAIN_BRANCH$")"
+# branches="$(git branch -a --format='%(refname:short)' | grep -v "^$MAIN_BRANCH$" | head -n 250)"
+branches="$(git branch --format='%(refname:short)')"
 # branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo)
 #  | sed 's/remotes\/origin\///g'
 
 while IFS= read -r line; do
     if [ -z "$line" ]; then
+        continue
+    fi
+    if [ "$line" == "$MAIN_BRANCH" ]; then
         continue
     fi
     branchName=$(echo "$line" | grep -v '^origin/' || echo)
@@ -170,6 +171,9 @@ done <<< "$branches"
 # echo "$branchesLocal"
 echo
 
+echo ""
+git status | tail -n +4
+echo ""
 
 if [ ! -z "$(git diff --staged)" ]; then
     echo ""
