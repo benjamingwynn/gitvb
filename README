@@ -1,6 +1,46 @@
+gitvb
+
 i liked the idea of gitbutler and it's virtual branches, but it seemed to have problems working with all my other tools and seemed a bit unstable
 
-this is probably more unstable than gitbutler, but it doesn't hide anything from you and is a purely cli tool
+this may also be similar to gitlens' "Worktrees" feature but i haven't tried that out
+
+this is probably more unstable than gitbutler and other tools that are appearing, but it doesn't hide anything from you and is a purely cli tool
+
+this is a proof-of-concept/work-in-progress, hence why it's written in bash!
+
+works goes directly ontop of the `MAIN_BRANCH` env var, it defaults to `MAIN`
+
+to install this, add everything to your path. every 'function' is its own file here to help with debug/development
+
+obviously this won't be bash long-term, its good enough to experiment with though
+
+list of user facing commands to get started:
+
+gitvb-status: shows status, start here, this always fetches the remote when its ran
+gitvb-pick: picks a branch onto your main branch
+gitvb-unpick: unpicks a picked branch
+gitvb-resync: resyncs all your picked branches by rebasing them on the remotes main branch
+gitvb-commit: commits the current stage onto a picked branch
+gitvb-publish: publish changes to a picked branch
+
+there's also some helpful commands for dealing with the remote:
+
+gitvb-remote-create: create a branch on the remote
+gitvb-remote-rename: renames a branch, note this'll close any linked MR/PRs
+gitvb-remote-rm: deletes a branch from both the local and remote
+gitvb-remote-ls: lists branches available on the remote
+gitvb-remote-track: downloads a ref of the branch on your machine for tracking locally
+
+some other commands you may want to be aware of:
+
+gitvb-sync-unpicked: syncs an unpicked branch, rebasing it on remotes main branch
+gitvb-s: only the file print out of gitvb-status without fetching, good `git status` drop-in
+gitvb-diff: shows the diff between the remote and any tracked branch you specify
+gitvb-nuke: entirely removes all of gitvb's changes on your repo, without modifying the underlying branches
+gitvb-rewrite: starts interactive rebase of a picked branch so you can rewrite its commits
+gitvb-publish-all: publishes everything in a single command
+gitvb-send: combo gitvb-commit + gitvb-publish, allows for staging and running a single command to commit+push to a picked branch
+gitvb-pick-new: combines gitvb-remote-create and gitvb-pick into a single command
 
 i am not responsible for the destruction of your repos
 
