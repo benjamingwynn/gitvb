@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff)" ]; then
+    #     --------------------------------------------------------------------------------
+    echo
+    echo "cannot unpick this. you have changed tracked files and we don't know"
+    echo "which of these changes should belong to which branch"
+    echo
+    echo "the following tracked files are changed:"
+    echo
+    git diff --name-only
+    echo
+    echo "you have options:"
+    echo
+    echo "  if nothing in your working tree belongs to anything you've picked:"
+    echo "   - stash everything tracked with \`git stash\`"
+    echo 
+    echo "  if every change here belongs to one of your picked branches:"
+    pickedBranches="$(gitvb-ls)"
+    if [ ! -z "$pickedBranches" ]; then
+        while IFS= read -r line; do
+            echo "   - commit everything tracked to $line with \`gitvb-commit -a $line\`"
+        done <<< "$pickedBranches"
+    fi
+    echo 
+    echo "  if you have a mix of changes:"
+    echo "   - stage and commit them individually with \`gitvb-commit <branch>\`"
+    echo
+    exit 1
+fi

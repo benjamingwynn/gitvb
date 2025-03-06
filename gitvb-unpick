@@ -16,29 +16,7 @@ if [ ! -z "$(git diff --staged)" ]; then
     exit 1
 fi
 
-if [ ! -z "$(git diff)" ]; then
-    #     --------------------------------------------------------------------------------
-    echo
-    echo "cannot unpick. you have changed tracked files and we don't know which of these"
-    echo "changes should belong to $pickBranch"
-    echo
-    echo "the following tracked files are changed:"
-    echo
-    git diff --name-only
-    echo
-    echo "you have options:"
-    echo
-    echo "  if nothing in your working tree belongs to $pickBranch:"
-    echo 
-    echo "   - stash everything tracked with \`git stash\`"
-    echo 
-    echo "  if you have outstanding changes for $pickBranch:"
-    echo 
-    echo "   - commit them with \`gitvb-commit $pickBranch\`"
-    # echo "     - stash them with \`gitvb-stash $pickBranch\`"
-    echo
-    exit 1
-fi
+gitvb-is-unpickable
 
 if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     echo "you are not on the main branch: $MAIN_BRANCH"

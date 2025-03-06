@@ -172,7 +172,7 @@ done <<< "$branches"
 echo
 
 echo ""
-git status | tail -n +4
+git status | tail -n +5
 echo ""
 
 if [ ! -z "$(git diff --staged)" ]; then
