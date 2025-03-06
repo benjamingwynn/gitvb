@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# returns if the stage matches and empty string if it doesn't
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-commit <branch>"
+    exit 1
+fi
+branch="$1"
+
+# read every item from the stage
+
+stagedFiles="$(git diff --name-only --cached)"
+branchFiles="$(gitvb-list-changed $branch)"
+
+while IFS= read -r stagedFile; do    
+    match=0
+    while IFS= read -r branchFile; do
+        if [ "$stagedFile" == "$branchFile" ]; then
+            match=$((match + 1))
+            break
+        fi
+    done <<< "$branchFiles"
+
+    if [ "$match" == 0 ]; then
+        echo "$stagedFile is not on $branch" >&2
+        exit 1
+    fi
+done <<< "$stagedFiles"
+# echo $1

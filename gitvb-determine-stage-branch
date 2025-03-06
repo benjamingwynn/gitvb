@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# ...
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+branches="$(gitvb-ls)"
+matches=""
+match=""
+match_count=0
+while IFS= read -r branch; do
+    set +e
+    gitvb-does-stage-match $branch 2>&2
+
+    if [ $? -eq 0 ]; then
+        match_count=$((match_count + 1))
+        match="$branch"
+        matches="$matches
+$branch"
+    fi
+    set -e
+done <<< "$branches"
+
+if [ "$match_count" -eq 1 ]; then
+    echo "$match"
+    exit 0
+elif [ "$match_count" -eq 0 ]; then
+    echo "staged files don't directly match any picked branches" >&2
+    exit 1
+else
+    echo "staged files ambiguously match branches: $matches" >&2
+    exit 1
+fi
+
+
