@@ -97,6 +97,11 @@ $line"
         fi
         # printf " nRemote=$nRemote nAhead=$nRemote"
         echo ""
+        git diff --name-status origin/master..$line | awk '
+  $1 == "D" {print "\033[31m" "      -   " $2 "\033[0m"}
+  $1 == "A" {print "\033[32m" "      +   " $2 "\033[0m"}
+  $1 == "M" {print "\033[90m" "      ~   " $2 "\033[0m"}
+'
     done <<< "$pickedBranches"
 fi
 

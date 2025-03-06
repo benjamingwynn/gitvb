@@ -36,6 +36,27 @@ if [ ! -f "$vbFilePath" ]; then
     exit 2
 fi
 
+# determine if we're up-to-date before allowing a commit, otherwise when we repick we'll tell the user to do gitvb-sync-unpicked
+git fetch --progress
+nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
+
+if [ "$nMainBehind" != "0" ]; then
+    echo ""
+    echo "your main branch $MAIN_BRANCH is behind by $nMainBehind commits"
+    echo "  before trying to commit, you probably want to run"
+    echo "  $ gitvb-resync"
+    echo ""
+    exit 3
+fi
+
+if [ -z "$(git ls-remote --heads origin $commitBranch)" ]; then
+    echo ""
+    echo "the branch '$commitBranch' does not exist on the remote"
+    echo ""
+    exit 4
+fi
+
+
 git commit -v
 # then get previous/last commit id
 addedCommitHash="$(git rev-parse "$MAIN_BRANCH")"

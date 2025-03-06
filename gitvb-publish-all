@@ -16,10 +16,14 @@ fi
 
 pickedBranches="$(gitvb-ls)"
 
-echo
-echo "** need to resync before publishing!"
-echo
-gitvb-resync
+git fetch --progress
+nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
+if [ "$nMainBehind" != "0" ]; then
+    echo
+    echo "** need to resync before publishing!"
+    echo
+    gitvb-resync
+fi
 
 if [ ! -z "$pickedBranches" ]; then
     while IFS= read -r line; do
@@ -29,3 +33,5 @@ if [ ! -z "$pickedBranches" ]; then
         gitvb-publish "$line" --no-resync
     done <<< "$pickedBranches"
 fi
+
+gitvb-status
