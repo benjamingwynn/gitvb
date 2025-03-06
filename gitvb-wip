@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
 set -e
 
-WIP_TOKEN=">>WIP<< ${1:-unspecified} >>WIP<<"
+WIP_TOKEN=">>WIP<<"
+
+while true; do
+    # Find the stash index with the token
+    stash_index=$(git stash list | grep "$WIP_TOKEN" | head -n 1 | awk '{print $1}' | sed 's/:$//')
+
+    # If no matching stash is found, break the loop
+    if [ -z "$stash_index" ]; then
+        echo "No more stashes with the token '$WIP_TOKEN' found."
+        break
+    fi
+
+    echo ""
+    echo "there already exists a gitvb WIP stash here!"
+    echo "this indicates that a gitvb command failed and you need to manually recover."
+    echo "bailing."
+    echo ""
+    exit 1
+done
+
 
 git stash --include-untracked -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+') $WIP_TOKEN"
