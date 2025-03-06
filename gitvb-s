@@ -5,7 +5,7 @@ echo "staged:"
 gitvb-list-staged
 # echo ""
 echo -en "  detected as: \033[1m"
-gitvb-determine-stage-branch 2> /dev/null || echo -n
+gitvb-determine-stage-branch 2> /dev/null || echo "?"
 echo -e "\033[0m"
 
 echo "unstaged:"

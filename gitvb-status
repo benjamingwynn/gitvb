@@ -100,7 +100,6 @@ $line"
             fi
         fi
         # printf " nRemote=$nRemote nAhead=$nRemote"
-        echo -n "."
         echo ""
         git diff --name-status $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..$line | awk '
   $1 == "D" {print "\033[31m" "      -   " $2 "\033[0m"}

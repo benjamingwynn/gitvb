@@ -15,11 +15,12 @@ fi
 
 list="$1"
 picked="$(gitvb-ls)"
+extra="$2"
 
 if [ ! -z "$list" ]; then
     while IFS= read -r file; do
         # echo "debug=$file"
-        echo -n "$(git diff --name-status $file | gitvb-pretty-status)  "
+        echo -n "$(git diff --name-status $extra $file | gitvb-pretty-status)  "
         set +e
         while IFS= read -r branch; do
             if gitvb-is-changed-by-branch $file $branch 2> /dev/null; then

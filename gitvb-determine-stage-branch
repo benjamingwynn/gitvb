@@ -6,7 +6,7 @@ GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ -z "$(git diff --staged)" ]; then
-    echo "there are no staged changes"
+    echo "there are no staged changes" >&2
     exit 1
 fi
 
