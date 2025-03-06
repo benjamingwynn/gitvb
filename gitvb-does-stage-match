@@ -6,7 +6,7 @@ GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ "$1" == "" ]; then
-    echo "usage: gitvb-commit <branch>"
+    echo "usage: gitvb-does-stage-match <branch>"
     exit 1
 fi
 branch="$1"

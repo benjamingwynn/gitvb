@@ -5,9 +5,21 @@ GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ "$1" == "" ]; then
-    echo "WARNING: no branch provided so determining one automatically"
+    echo "no branch provided so trying to determine it automatically"
     # echo "usage: gitvb-commit <branch>"
-    commitBranch="$(gitvb-determine-stage-branch 2> /dev/null)"
+    commitBranch="$(gitvb-determine-stage-branch 2> /dev/null || {
+        echo "" >&2
+        echo "Cannot determine branch for your stage, please specify one manually." >&2
+        echo "  $ gitvb-commit [branch]" >&2
+        echo "" >&2
+        echo "staged:" >&2
+        gitvb-list-staged >&2
+        echo "" >&2
+        echo "picked branches:" >&2
+        gitvb-ls | awk '{print " - " $1}' >&2
+        echo "" >&2
+        exit 1
+    })"
     echo "determined branch is: $commitBranch"
     # exit 1
 else
@@ -43,6 +55,7 @@ fi
 # determine if we're up-to-date before allowing a commit, otherwise when we repick we'll tell the user to do gitvb-sync-unpicked
 echo "fetching..."
 git fetch --quiet
+echo "ok!"
 nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
 
 if [ "$nMainBehind" != "0" ]; then

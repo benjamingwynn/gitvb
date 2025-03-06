@@ -3,10 +3,15 @@ set -e
 
 GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
+STAGE_STASH_MSG="STAGED CHANGES FROM GITVB-RESYNC"
 
+stashedStage="0"
 if [ ! -z "$(git diff --staged)" ]; then
-    echo "there are staged changes. exiting."
-    exit 1
+    # echo "there are staged changes. exiting."
+    echo "WARNING: stashing the stage!"
+    git stash --staged -m "$STAGE_STASH_MSG"
+    stashedStage="1"
+    # exit 1
 fi
 
 if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
@@ -20,9 +25,9 @@ fi
 # 1. fetch
 # echo a
 # git fetch --progress
-echo
-echo "(fetching)"
-git fetch --progress
+echo "fetching..."
+git fetch --quiet
+echo "ok!"
 
 # nBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
 # if [ "$nBehind" == "0" ]; then
@@ -32,10 +37,10 @@ git fetch --progress
 #     exit 18
 # fi
 
-echo b
+echo b...
 # 2. wip commit if any unstaged files changed
 gitvb-wip resync
-echo c
+echo c...
 pickedBranches="$(gitvb-ls)"
 
 # 3. unpick every picked branch
@@ -54,7 +59,7 @@ repickBranches=""
 
 # 4. checkout each picked branch, and with it rebase on origin/master
 if [ ! -z "$pickedBranches" ]; then
-    echo d
+    echo d...
     while IFS= read -r line; do
         echo i will now checkout $line
         git checkout "$line"
@@ -86,7 +91,7 @@ fi
 
 
 # 6. (re)pick each branch
-echo e
+echo e...
 git checkout $MAIN_BRANCH
 if [ ! -z "$repickBranches" ]; then
     echo f
@@ -98,10 +103,23 @@ if [ ! -z "$repickBranches" ]; then
     done <<< "$repickBranches"
 fi
 
-echo g
+echo g...
 
 # 7. undo wip
 gitvb-wip-undo resync
+
+# undo the stage stash
+if [ "$stashedStage" == "1" ]; then
+    if [[ "$(git stash list)" == *$STAGE_STASH_MSG* ]]; then
+        echo "Reapplying stash onto stage!"
+        git stash pop --index # index pops onto the stage
+    else 
+        echo "oops, don't have expected stash for the stage!"
+        exit 8
+    fi
+else
+    echo "no stash to reapply back to stage"
+fi
 
 echo ""
 echo "everything is now up to date"

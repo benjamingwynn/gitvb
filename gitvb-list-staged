@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+staged="$(git diff --staged --name-only)"
+picked="$(gitvb-ls)"
+
+gitvb-pretty-changelist "$staged"

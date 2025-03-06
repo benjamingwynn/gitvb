@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# returns if the stage matches and empty string if it doesn't
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+USAGE="usage: gitvb-is-changed-by-branch <file> <branch>"
+
+if [ "$1" == "" ]; then
+    echo $USAGE
+    exit 1
+fi
+if [ "$2" == "" ]; then
+    echo $USAGE
+    exit 1
+fi
+file="$1"
+branch="$2"
+
+branchFiles="$(gitvb-list-changed $branch)"
+
+match=0
+while IFS= read -r branchFile; do
+    if [ "$file" == "$branchFile" ]; then
+        match=$((match + 1))
+        break
+    fi
+done <<< "$branchFiles"
+
+if [ "$match" == 0 ]; then
+    echo "$file is not on $branch" >&2
+    exit 1
+fi
+
+# echo "$branch"

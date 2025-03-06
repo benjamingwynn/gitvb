@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-WIP_TOKEN=">>WIP<<"
+WIP_TOKEN=">>WIP<< ${1:-unspecified} >>WIP<<"
 
 while true; do
     # Find the stash index with the token
@@ -20,6 +20,5 @@ while true; do
     echo ""
     exit 1
 done
-
 
 git stash --include-untracked -m "[gitvb] work in progress - $(gitvb-ls | tr '\n' '+') $WIP_TOKEN"
