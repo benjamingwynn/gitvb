@@ -10,7 +10,9 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-git fetch --progress
+echo "fetching..."
+git fetch --quiet
+echo "ok!"
 nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
 
 pickedBranches="$(gitvb-ls)"
@@ -59,11 +61,10 @@ if [ ! -z "$pickedBranches" ]; then
 
         echo -n "[+$nAhead]  $line"
 
-
         if [ "$nAhead" != "0" ]; then
             # echo -n " - !"
-            if [ -z "$(git ls-remote --heads origin $newBranch)" ]; then
-                echo -n "- remote gone!!!"
+            if [ -z "$(git show-ref --heads origin $line)" ]; then
+                echo -n " - remote gone!!!"
                 needResync=true
             fi
         fi
@@ -96,31 +97,14 @@ $line"
             fi
         fi
         # printf " nRemote=$nRemote nAhead=$nRemote"
+        echo -n "."
         echo ""
         git diff --name-status $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..$line | awk '
   $1 == "D" {print "\033[31m" "      -   " $2 "\033[0m"}
   $1 == "A" {print "\033[32m" "      +   " $2 "\033[0m"}
-  $1 == "M" {print "\033[90m" "      ~   " $2 "\033[0m"}
+  $1 == "M" {print "\033[36m" "      ~   " $2 "\033[0m"}
 '
     done <<< "$pickedBranches"
-fi
-
-if [ "$needResync" == true ]; then
-    echo ""
-    echo " ⚠️  A remote has gone or there are upstream changes, you must resync!"
-    echo "    $ gitvb-resync"
-else
-    if [ ! -z "$publishBranches" ]; then
-        echo
-        echo "upstream your changes with"
-
-        while IFS= read -r line; do
-            if [ -z "$line" ]; then
-                continue
-            fi
-            echo " $ gitvb-publish $line"
-        done <<< "$publishBranches"
-    fi
 fi
 
 # > verify all of the applied hashes are applied still
@@ -174,16 +158,49 @@ done <<< "$branches"
 # echo "   ✳️  ready to be picked     ☯️  sync required"
 
 # echo "$branchesLocal"
-echo
-
 echo ""
-git status | tail -n +5
+
+echo "staged:"
+git diff --staged --name-status | gitvb-pretty-status
+# echo ""
+echo -en "     detected as: \033[1m"
+gitvb-determine-stage-branch 2> /dev/null || echo "(unknown)"
+echo -e "\033[0m"
+
+echo "unstaged:"
+git diff --name-status | gitvb-pretty-status
+echo ""
+
+echo "untracked:"
+git ls-files --others --exclude-standard | awk '{print "\033[32m" "  +  " $1 "\033[0m"}'
 echo ""
 
 gitvb-check-state
-if [ ! -z "$(git diff --staged)" ]; then
+
+
+if [ "$needResync" == true ]; then
     echo ""
-    echo "you have staged changes."
-    echo "  commit with $ gitvb-commit <branch>."
+    echo " ⚠️  A remote has gone or there are upstream changes, you must resync!"
+    echo "    $ gitvb-resync"
     echo ""
+else
+    if [ ! -z "$(git diff --staged)" ]; then
+        echo ""
+        echo "you have staged changes."
+        echo "  commit with $ gitvb-commit <branch>."
+        echo ""
+    fi
+
+
+    if [ ! -z "$publishBranches" ]; then
+        echo
+        echo "upstream your changes with"
+
+        while IFS= read -r line; do
+            if [ -z "$line" ]; then
+                continue
+            fi
+            echo " $ gitvb-publish $line"
+        done <<< "$publishBranches"
+    fi
 fi
