@@ -19,8 +19,6 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-# 0. bail if anything staged
-# gitvb-is-unpickable
 
 # 1. fetch
 # echo a

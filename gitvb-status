@@ -102,9 +102,9 @@ $line"
         # printf " nRemote=$nRemote nAhead=$nRemote"
         echo ""
         git diff --name-status $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..$line | awk '
-  $1 == "D" {print "\033[31m" "      -   " $2 "\033[0m"}
-  $1 == "A" {print "\033[32m" "      +   " $2 "\033[0m"}
-  $1 == "M" {print "\033[36m" "      ~   " $2 "\033[0m"}
+  $1 == "D" {print "\033[31m" "       -  " $2 "\033[0m"}
+  $1 == "A" {print "\033[32m" "       +  " $2 "\033[0m"}
+  $1 == "M" {print "\033[36m" "       ~  " $2 "\033[0m"}
 '
     done <<< "$pickedBranches"
 fi
@@ -163,34 +163,34 @@ done <<< "$branches"
 echo ""
 gitvb-s
 
-
 if [ "$needResync" == true ]; then
-    echo ""
     echo " ⚠️  A remote has gone or there are upstream changes, you must resync!"
     echo "    $ gitvb-resync"
     echo ""
 else
     if [ ! -z "$(git diff --staged)" ]; then
-        echo ""
         echo "you have staged changes, commit with:"
         echo "  $ gitvb-commit"
+        echo ""
+        echo "or directly commit and send to the remote with:"
+        echo "  $ gitvb-send"
+        echo
     fi
 
     if [ $nNeedPublish == $nPicked ]; then
-        echo
         echo "upstream your changes with:"
         echo "  $ gitvb-publish-all"
+        echo
     else
         if [ ! -z "$publishBranches" ]; then
-            echo
             echo "upstream your changes with:"
             while IFS= read -r line; do
                 if [ -z "$line" ]; then
                     continue
                 fi
                 echo " $ gitvb-publish $line"
+                echo
             done <<< "$publishBranches"
         fi
     fi
-    echo ""
 fi

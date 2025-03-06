@@ -2,11 +2,16 @@
 set -e
 
 echo "staged:"
-gitvb-list-staged
-# echo ""
-echo -en "  detected as: \033[1m"
-gitvb-determine-stage-branch 2> /dev/null || echo "?"
-echo -e "\033[0m"
+if [ -z "$(git diff --staged)" ]; then
+    echo -en "\033[90m"
+    echo "  (none)"
+    echo -e "\033[0m"
+else
+    gitvb-list-staged
+    echo -en "  detected as: \033[1m"
+    gitvb-determine-stage-branch 2> /dev/null || echo "?"
+    echo -e "\033[0m"
+fi
 
 echo "unstaged:"
 gitvb-pretty-changelist "$(git diff --name-only)"
@@ -14,7 +19,15 @@ gitvb-pretty-changelist "$(git diff --name-only)"
 echo ""
 
 echo "untracked:"
-git ls-files --others --exclude-standard | awk '{print "\033[32m" "  +  " $1 "\033[0m"}'
+untracked=$(git ls-files --others --exclude-standard | awk '{print "\033[32m" "  +  " $1 "\033[0m"}')
+if [ -z "$untracked" ]; then
+    echo -en "\033[90m"
+    echo "  (none)"
+    echo -en "\033[0m"
+else
+    echo "$untracked"
+fi
 echo ""
 
 gitvb-check-state
+echo

@@ -9,10 +9,13 @@ if [ ! -z "$(git diff)" ]; then
     echo
     echo "cannot unpick this. you have changed tracked files and we don't know"
     echo "which of these changes should belong to which branch"
+    echo ""
+    echo "if gitvb just blindly stashed the changes, they might not reapply onto the tree"
+    echo "after unpicking this branch, so we can't do anything automatically."
     echo
     echo "the following tracked files are changed:"
     echo
-    git diff --name-only
+    gitvb-pretty-changelist "$(git diff --name-only)"
     echo
     echo "you have options:"
     echo
