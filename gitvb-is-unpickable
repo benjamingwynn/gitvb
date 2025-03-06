@@ -4,34 +4,49 @@ set -e
 GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
-if [ ! -z "$(git diff)" ]; then
-    #     --------------------------------------------------------------------------------
-    echo
-    echo "cannot unpick this. you have changed tracked files and we don't know"
-    echo "which of these changes should belong to which branch"
-    echo ""
-    echo "if gitvb just blindly stashed the changes, they might not reapply onto the tree"
-    echo "after unpicking this branch, so we can't do anything automatically."
-    echo
-    echo "the following tracked files are changed:"
-    echo
-    gitvb-pretty-changelist "$(git diff --name-only)"
-    echo
-    echo "you have options:"
-    echo
-    echo "  if nothing in your working tree belongs to anything you've picked:"
-    echo "   - stash everything tracked with \`git stash\`"
-    echo 
-    echo "  if every change here belongs to one of your picked branches:"
-    pickedBranches="$(gitvb-ls)"
-    if [ ! -z "$pickedBranches" ]; then
-        while IFS= read -r line; do
-            echo "   - commit everything tracked to $line with \`gitvb-commit -a $line\`"
-        done <<< "$pickedBranches"
-    fi
-    echo 
-    echo "  if you have a mix of changes:"
-    echo "   - stage and commit them individually with \`gitvb-commit <branch>\`"
-    echo
+if [ -z "$1" ]; then
+    echo "usage: gitvb-is-unpickable <branch>"
     exit 1
+fi
+
+# if you're unpicking you shouldn't have staged changes since we don't check your stage here
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+
+branch="$1"
+
+files="$(git diff --name-only)"
+picked="$(gitvb-ls)"
+stashAdvice=""
+
+if [ ! -z "$files" ]; then
+    while IFS= read -r file; do
+        # check what branch this file belongs to:
+        while IFS= read -r branch; do
+            if gitvb-is-changed-by-branch $file $branch 2> /dev/null; then
+                echo
+                echo "cannot unpick this. your working tree builds upon the work of one of your picked branches."
+                echo "i.e. $file is modified on '$branch' but also in your tree"
+                echo ""
+                echo "if gitvb just blindly stashed the changes, they may not reapply onto the tree"
+                echo "after unpicking this branch, so we can't safely do anything automatically."
+                echo
+                echo "current working tree includes:"
+                gitvb-pretty-changelist "$(git diff --name-only)"
+                echo 
+                echo "the minimum to continue unpicking is:"
+                echo ""
+                echo "  $ git stash -m 'work on top of $branch' -- $file"
+                echo ""
+                echo "if you wish to continue unpicking"
+                echo ""
+                exit 1
+            fi
+        done <<< "$picked"
+    done <<< "$files"
+
+    echo "unpick lgtm!"
 fi

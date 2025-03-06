@@ -22,7 +22,7 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
 fi
 
 # this is safe to always check because other gitvb programs stash before calling this
-gitvb-is-unpickable
+gitvb-is-unpickable "$pickBranch"
 
 vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
 
