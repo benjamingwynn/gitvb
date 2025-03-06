@@ -180,6 +180,7 @@ echo ""
 git status | tail -n +5
 echo ""
 
+gitvb-check-state
 if [ ! -z "$(git diff --staged)" ]; then
     echo ""
     echo "you have staged changes."

@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+# Check for merge state
+if [ -f .git/MERGE_HEAD ]; then
+  echo "You are in the middle of a merge. Please run 'git status' to resolve any conflicts." >&2
+  exit 1
+fi
+
+# Check for rebase state
+if [ -d .git/rebase-apply ] || [ -d .git/rebase-merge ]; then
+  echo "You are in the middle of a rebase. Please run 'git status' to continue." >&2
+  exit 2
+fi
+
+# Check for unmerged (conflicted) files
+if git diff --name-only --diff-filter=U | grep -q .; then
+  echo "You have unresolved conflicts. Please run 'git status' to resolve them." >&2
+  exit 3
+fi
+
+# If none of the above conditions are met
+echo "Your repository is in a clean state. No rebase, merge, or conflict detected."
