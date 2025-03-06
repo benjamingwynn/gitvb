@@ -5,6 +5,11 @@ set -e
 GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
+if [ -z "$(git diff --staged)" ]; then
+    echo "there are no staged changes"
+    exit 1
+fi
+
 branches="$(gitvb-ls)"
 matches=""
 match=""

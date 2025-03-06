@@ -10,4 +10,5 @@ if [ "$1" == "" ]; then
 fi
 branch="$1"
 
-git diff --name-only origin/master..$branch # | awk '{print $2}'
+
+git diff --name-only $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..$branch # | awk '{print $2}'

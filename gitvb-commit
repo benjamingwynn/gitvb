@@ -5,10 +5,14 @@ GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ "$1" == "" ]; then
-    echo "usage: gitvb-commit <branch>"
-    exit 1
+    echo "WARNING: no branch provided so determining one automatically"
+    # echo "usage: gitvb-commit <branch>"
+    commitBranch="$(gitvb-determine-stage-branch 2> /dev/null)"
+    echo "determined branch is: $commitBranch"
+    # exit 1
+else
+    commitBranch="$1"
 fi
-commitBranch="$1"
 
 if [ -z "$(git diff --staged)" ]; then
     echo "there are no staged changes. exiting."
@@ -37,7 +41,8 @@ if [ ! -f "$vbFilePath" ]; then
 fi
 
 # determine if we're up-to-date before allowing a commit, otherwise when we repick we'll tell the user to do gitvb-sync-unpicked
-git fetch --progress
+echo "fetching..."
+git fetch --quiet
 nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
 
 if [ "$nMainBehind" != "0" ]; then
@@ -46,12 +51,15 @@ if [ "$nMainBehind" != "0" ]; then
     echo "  before trying to commit, you probably want to run"
     echo "  $ gitvb-resync"
     echo ""
+    echo "(no work was done)"
+    echo ""
     exit 3
 fi
 
 if [ -z "$(git ls-remote --heads origin $commitBranch)" ]; then
     echo ""
     echo "the branch '$commitBranch' does not exist on the remote"
+    echo "(no work was done)"
     echo ""
     exit 4
 fi
