@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+USAGE="usage: gitvb-remote-rm <branch>"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    echo $USAGE
+    exit 1
+fi
+
+oldBranch="$1"
+
+vbFilePath="$GITVB_HOME/$oldBranch.gitvb"
+
+if [ -f "$vbFilePath" ]; then
+    echo
+    echo "cannot remote delete '$oldBranch' since it's picked"
+    echo "unpick it first!"
+    echo
+    exit 2
+fi
+
+nUnpushed=$(git rev-list --count origin/$oldBranch..$oldBranch)
+
+if [ "$nUnpushed" != "0" ]; then
+    echo
+    echo "cannot remote delete '$oldBranch' since it has $nUnpushed unpushed changes"
+    echo
+    exit 3
+fi
+
+echo "remote-mv: delete old branch '$oldBranch' from local"
+git branch -D $oldBranch
+
+echo "remote-mv: delete old branch '$oldBranch' from remote"
+git push -d origin $oldBranch
+
+echo
+echo "successfully deleted $oldBranch forever!"
+echo
