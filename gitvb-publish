@@ -46,11 +46,11 @@ echo "nRemote=$nRemote"
 if [ "$nRemote" != "0" ]; then
     echo " (force required, remote not on $MAIN_BRANCH)"
     echo "force pushing..."
-    git push --force-with-lease
+    git push --force-with-lease || git push --force-with-lease
 else 
     echo "pushing..."
     echo " (not using force)"
-    git push
+    git push || git push
 fi
 
 git checkout "$MAIN_BRANCH"
