@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+echo "staged:"
+gitvb-list-staged
+# echo ""
+echo -en "  detected as: \033[1m"
+gitvb-determine-stage-branch 2> /dev/null || echo -n
+echo -e "\033[0m"
+
+echo "unstaged:"
+gitvb-pretty-changelist "$(git diff --name-only)"
+# git diff --name-status | gitvb-pretty-status
+echo ""
+
+echo "untracked:"
+git ls-files --others --exclude-standard | awk '{print "\033[32m" "  +  " $1 "\033[0m"}'
+echo ""
+
+gitvb-check-state
