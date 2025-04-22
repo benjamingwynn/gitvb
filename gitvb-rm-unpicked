@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-rm-unpicked <branch>"
+    exit 1
+fi
+rmBranch="$1"
+
+vbFilePath="$GITVB_HOME/$rmBranch.gitvb"
+
+if [ -f "$vbFilePath" ]; then
+    echo "cannot delete a picked branch $rmBranch, unpick it first"
+    exit 2
+fi
+
+# create patches, just in case
+echo "creating backup..."
+dir="/tmp/gitvb-backup/$rmBranch"
+mkdir -p "$dir"
+git format-patch origin/master..benjamin/training-sprint --progress -o "$dir"
+
+echo "deleting branch..."
+git branch -D "$rmBranch"
+
+echo "done!"
