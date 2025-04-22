@@ -49,7 +49,7 @@ if [ "$nUnpushed" != "0" ]; then
 fi
 
 echo "remote-mv: delete old branch '$oldBranch' from local"
-git branch -D $oldBranch
+gitvb-rm-unpicked $oldBranch
 
 echo "remote-mv: delete old branch '$oldBranch' from remote"
 git push -d origin $oldBranch
