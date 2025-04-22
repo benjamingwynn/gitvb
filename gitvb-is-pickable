@@ -25,6 +25,7 @@ if [ "$REMOTE_COMMITS" -gt 0 ]; then
   echo "*** Branch '$BRANCH_NAME' needs rebasing on 'origin/$MAIN_BRANCH'. ***"
   echo "      It is $REMOTE_COMMITS commits behind,"
   echo "      run $ gitvb-sync-unpicked $BRANCH_NAME"
+  echo "      or $ gitvb-pick-outdated $BRANCH_NAME"
   echo "      or rebase it manually."
   echo ""
   exit 1

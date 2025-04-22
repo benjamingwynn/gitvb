@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-remote-rebase <branch>"
+    exit 1
+fi
+
+branch="$1"
+
+if [ -f "$vbFilePath" ]; then
+    echo
+    echo "cannot remote rebase '$branch' since it's picked"
+    echo "unpick it first, or use gitvb-resync"
+    echo
+    exit 2
+fi
+
+echo "remote-rebase: wip stash"
+gitvb-wip remote-base
+
+echo "remote-rebase: fetching..."
+git fetch --quiet
+
+echo "remote-rebase: checking out '$branch'"
+git checkout $branch
+
+echo "remote-rebase: pulling..."
+git pull
+
+echo "remote-rebase: rebasing..."
+git rebase "origin/$MAIN_BRANCH"
+
+echo "remote-rebase: pushing..."
+git push --force-with-lease
+
+echo "remote-rebase: going back to $MAIN_BRANCH"
+git checkout $MAIN_BRANCH
+
+echo "remote-rebase: undo wip stash"
+gitvb-wip-undo remote-base
+
+echo
+echo "successfully rebased $branch"
+echo "  you can pick it by running"
+echo "  $ gitvb-pick $newBranch"
+echo

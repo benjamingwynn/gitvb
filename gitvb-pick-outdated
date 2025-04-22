@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-pick-outdated <branch>"
+    exit 1
+fi
+
+gitvb-remote-rebase "$1"
+gitvb-pick "$1"
