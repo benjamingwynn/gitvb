@@ -9,8 +9,9 @@ if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
     exit 1
 fi
 
-echo "fetching..."
+echo -n "fetching... "
 git fetch --quiet
+remoteBranches=$(gitvb-remote-ls-all)
 echo "ok!"
 nMainBehind=$(git rev-list --count $MAIN_BRANCH..origin/$MAIN_BRANCH)
 
@@ -122,6 +123,7 @@ branches="$(git branch --format='%(refname:short)')"
 # branchesLocal=$(echo "$branches" | grep -v '^origin/' || echo)
 #  | sed 's/remotes\/origin\///g'
 
+nGone=0
 while IFS= read -r line; do
     if [ -z "$line" ]; then
         continue
@@ -149,10 +151,15 @@ while IFS= read -r line; do
     # if [ "$needsPublishing" == "1" ]; then
         echo -n " 🆗 "
     else 
-        echo -n " ☯️  "
+        if echo "$remoteBranches" | grep -q "^$branchName$"; then
+            echo -n " ☯️  "
+        else
+            echo -n " ❎ "
+            nGone=$((nGone + 1))
+        fi
     fi
 
-    echo "[+$nAhead]  $branchName" #
+    printf "[+%2d]  %s\n" "$nAhead" "$branchName"
     
 done <<< "$branches"
 
@@ -193,4 +200,11 @@ else
             done <<< "$publishBranches"
         fi
     fi
+fi
+
+
+if [ "$nGone" != "0" ]; then
+    echo " ❎ ℹ️  $nGone unpicked branches have been removed from the remote."
+    echo "       They were probably merged. Consider whether to delete these locally."
+    echo ""
 fi
