@@ -32,6 +32,13 @@ if [ -f "$vbFilePath" ]; then
     exit 2
 fi
 
+if [ -z "$(git ls-remote --heads origin $oldBranch)" ]; then
+    echo
+    echo "branch $oldBranch doesn't exist on the remote"
+    echo
+    exit 5
+fi
+
 nUnpushed=$(git rev-list --count origin/$oldBranch..$oldBranch)
 
 if [ "$nUnpushed" != "0" ]; then
