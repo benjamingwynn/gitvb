@@ -31,8 +31,6 @@ fi
 mkdir -p "$(dirname "$newVbFilePath")"
 
 # we can only pick branches that are up to date
-echo "pick: fetch"
-git fetch --progress
 echo "pick: is pickable?"
 gitvb-is-pickable $pickBranch
 
