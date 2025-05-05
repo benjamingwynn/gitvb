@@ -39,7 +39,7 @@ echo "remote-rebase: checking out '$branch'"
 git checkout $branch
 
 echo "remote-rebase: pulling..."
-git pull
+git pull --rebase
 
 echo "remote-rebase: rebasing..."
 git rebase "origin/$MAIN_BRANCH"
