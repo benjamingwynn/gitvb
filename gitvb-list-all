@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -e
+
+# this lists all files that are either unstaged or have been picked
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+git diff --name-only . > /tmp/gitvb-diff-a
+git diff --name-only $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..HEAD  > /tmp/gitvb-diff-b
+
+cat /tmp/gitvb-diff-a /tmp/gitvb-diff-b | sort | uniq
+rm /tmp/gitvb-diff-a /tmp/gitvb-diff-b
