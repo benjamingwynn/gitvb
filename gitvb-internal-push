@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -e
+GITVB_HOME="./.git/.gitvb-v0"
+
+if [ -z "$BRANCH" ]; then
+    echo "!!! internal error !!!! no BRANCH defined"
+    exit 1
+fi
+
+echo "(start gitvb internal push)"
+publishBranch="$BRANCH"
+
+pushOutFile="$GITVB_HOME/$publishBranch.gitvb-push-msg"
+mkdir -p "$(dirname "$pushOutFile")"
+set +e
+echo "PUSH_ARGS=$PUSH_ARGS"
+
+# Create an array to hold our git push arguments
+args_for_push=()
+
+# Only process PUSH_ARGS if it's not an empty string
+if [[ -n "$PUSH_ARGS" ]]; then
+  # This is the key change:
+  # Read the space-separated words from the string into the array.
+  read -r -a args_for_push <<< "$PUSH_ARGS"
+fi
+
+# Now, execute the command. The "${args_for_push[@]}" part is key.
+# It expands correctly to separate arguments, or to nothing if the array is empty.
+#
+# Note: Retrying the exact same command (|| git push ... again) is often redundant.
+# If the first push fails, the second will likely fail for the same reason.
+# I've kept it to match your original logic.
+bash -c 'git push "${@}" || git push "${@}"' _ "${args_for_push[@]}" >> "$pushOutFile" 2>&1
+
+exitCode=$?
+cat "$pushOutFile"
+echo "(gitvb internal push finish - exit code: $exitCode)"
+exit $exitCode
+
+# # Create an array to hold our git push arguments
+# args_for_push=()
+
+# # Only add PUSH_ARGS to the array if it's not an empty string
+# if [[ -n "$PUSH_ARGS" ]]; then
+#   args_for_push+=("$PUSH_ARGS")
+# fi
+
+# # Now, execute the command. The "${args_for_push[@]}" part is key.
+# # It expands to nothing if the array is empty, or to the fully quoted
+# # arguments if the array has content.
+# bash -c 'git push "${@}" || git push "${@}"' _ "${args_for_push[@]}" >> "$pushOutFile" 2>&1
+
+# exitCode=$?
+# cat $pushOutFile
+# echo "(gitvb internal push finish - exit code: $exitCode)"
+# exit $exitCode

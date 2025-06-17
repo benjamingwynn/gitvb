@@ -28,14 +28,15 @@ fi
 gitvb-wip
 git checkout "origin/$MAIN_BRANCH"
 git checkout -b "$newBranch"
-git push -u origin "$newBranch"
+echo "HIT INTERNAL PUSH!"
+BRANCH="$newBranch" PUSH_ARGS="-u origin $newBranch" gitvb-internal-push
 git checkout "$MAIN_BRANCH"
 gitvb-wip-undo
 # $x/gitvb-pick "$newBranch"
 
 
 echo
-echo "succesfully created $newBranch and uploaded it to origin!"
+echo "successfully created $newBranch and uploaded it to origin!"
 echo "  you can pick it by running"
 echo "  $ gitvb-pick $newBranch"
 echo

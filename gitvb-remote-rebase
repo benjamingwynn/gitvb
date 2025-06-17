@@ -45,7 +45,7 @@ echo "remote-rebase: rebasing..."
 git rebase "origin/$MAIN_BRANCH"
 
 echo "remote-rebase: pushing..."
-git push --force-with-lease
+BRANCH="$branch" PUSH_ARGS="--force-with-lease" gitvb-internal-push
 
 echo "remote-rebase: going back to $MAIN_BRANCH"
 git checkout $MAIN_BRANCH

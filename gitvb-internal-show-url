@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+GITVB_HOME="./.git/.gitvb-v0"
+
+if [ -z "$BRANCH" ]; then
+    echo "*** internal error *** no BRANCH defined"
+    exit 1
+fi
+
+pushOutFile="$GITVB_HOME/$BRANCH.gitvb-push-msg"
+if [ -f "$pushOutFile" ]; then
+    lastUrl=$(grep -oE '\bhttps?://[^ ]+\b' "$pushOutFile" | tail -n 1)
+    if [ ! -z "$lastUrl" ]; then
+        printf "\n"
+        # printf "\033[34m"
+        printf "\033[2;3m"
+        echo -n "    $lastUrl"
+        printf "\033[0m"
+    fi
+fi

@@ -35,5 +35,6 @@ git format-patch origin/master..benjamin/training-sprint --progress -o "$dir"
 
 echo "deleting branch..."
 git branch -D "$rmBranch"
+BRANCH="$rmBranch" gitvb-internal-branch-gone
 
 echo "done!"

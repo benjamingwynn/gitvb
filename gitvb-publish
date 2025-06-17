@@ -42,20 +42,22 @@ gitvb-wip publish
 git checkout "$publishBranch"
 
 nRemote=$(git rev-list --count "origin/$publishBranch" ^"$publishBranch")
+pushOutFile="$GITVB_HOME/$publishBranch.gitvb-push-msg"
 echo "nRemote=$nRemote"
 if [ "$nRemote" != "0" ]; then
     echo " (force required, remote not on $MAIN_BRANCH)"
     echo "force pushing..."
-    git push --force-with-lease || git push --force-with-lease
+    BRANCH="$publishBranch" PUSH_ARGS="--force-with-lease" gitvb-internal-push
 else 
     echo "pushing..."
     echo " (not using force)"
-    git push || git push
+    BRANCH="$publishBranch" PUSH_ARGS="" gitvb-internal-push
 fi
 
+echo "publish: success, now checking out main branch..."
 git checkout "$MAIN_BRANCH"
 gitvb-wip-undo publish
 
 echo
-echo "** succesfully published to $publishBranch"
+echo "** successfully published to $publishBranch"
 echo

@@ -58,13 +58,15 @@ echo "remote-mv: creating new branch '$newBranch'"
 git branch $newBranch
 
 echo "remote-mv: pushing"
-git push -u origin $newBranch
+BRANCH="$newBranch" PUSH_ARGS="-u origin $newBranch" gitvb-internal-push
 
 echo "remote-mv: delete old branch '$oldBranch' from local"
 git branch -D $oldBranch
 
 echo "remote-mv: delete old branch '$oldBranch' from remote"
 git push -d origin $oldBranch
+
+BRANCH="$newBranch" gitvb-internal-branch-gone
 
 echo "remote-mv: checkout out master"
 git checkout "$MAIN_BRANCH"

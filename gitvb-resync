@@ -81,6 +81,7 @@ $line"
             git checkout "$MAIN_BRANCH"
             echo "removing branch since the remote is gone"
             git branch -D $line
+            BRANCH="$line" gitvb-internal-branch-gone
         fi
 
 

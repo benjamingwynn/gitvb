@@ -23,10 +23,12 @@ if [ ! -z "$list" ]; then
         echo -n "$(git diff --name-status $extra -- $file | gitvb-pretty-status)  "
         set +e
         while IFS= read -r branch; do
-            if gitvb-is-changed-by-branch $file $branch 2> /dev/null; then
-                echo -en "\033[90m"
-                echo -n "$branch "
-                echo -en "\033[0m"
+            if [ ! -z "$branch" ]; then
+                if gitvb-is-changed-by-branch $file $branch 2> /dev/null; then
+                    echo -en "\033[90m"
+                    echo -n "$branch "
+                    echo -en "\033[0m"
+                fi
             fi
         done <<< "$picked"
         set -e

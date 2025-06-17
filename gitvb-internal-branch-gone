@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+if [ -z "$BRANCH" ]; then
+    echo "no BRANCH defined"
+    exit 1
+fi
+
+pushOutFile="$GITVB_HOME/$BRANCH.gitvb-push-msg"
+if [ -f "$pushOutFile" ]; then
+    rm -v $pushOutFile
+fi
