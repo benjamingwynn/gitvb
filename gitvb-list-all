@@ -3,7 +3,6 @@ set -e
 
 # this lists all files that are either unstaged or have been picked
 
-GITVB_HOME="./.git/.gitvb-v0"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 
 if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
@@ -15,9 +14,19 @@ if [ ! -z "$(git diff --staged)" ]; then
     echo "there are staged changes. exiting."
     exit 1
 fi
+TARGET_DIR="${1:-$(git rev-parse --show-toplevel)}"
+git diff --name-only -- "$TARGET_DIR" > /tmp/gitvb-diff-a
+git diff --name-only $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..HEAD -- "$TARGET_DIR" > /tmp/gitvb-diff-b
+output=$(cat /tmp/gitvb-diff-a /tmp/gitvb-diff-b | sort | uniq)
 
-git diff --name-only . > /tmp/gitvb-diff-a
-git diff --name-only $(git merge-base $MAIN_BRANCH origin/$MAIN_BRANCH)..HEAD  > /tmp/gitvb-diff-b
-
-cat /tmp/gitvb-diff-a /tmp/gitvb-diff-b | sort | uniq
 rm /tmp/gitvb-diff-a /tmp/gitvb-diff-b
+
+if [[ -n "$1" && "$2" == "--relative" ]]; then
+  # This command replaces the leading directory path ($1) and a slash with nothing.
+  # We use | as the sed delimiter to avoid conflicts if the path contains a /.
+  echo "$output" | sed "s|^$1/||"
+else
+  # Otherwise, just print the full paths.
+  echo "$output"
+fi
+

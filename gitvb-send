@@ -15,6 +15,20 @@ else
     branch="$1"
 fi
 
+set +e
+gitvb-sync-status
+syncExit=$?
+if [ "$syncExit" == "14" ]; then
+    echo "should resync..."
+    gitvb-resync
+elif [ "$syncExit" == "0" ]; then
+    echo "lgtm, does not need sync"
+else
+    echo "uh oh! - exit code: $syncExit"
+    exit $syncExit
+fi
+set -e
+
 gitvb-commit $1
 gitvb-publish $branch
 gitvb-status
