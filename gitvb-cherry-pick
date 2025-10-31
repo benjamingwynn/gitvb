@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+
+if [ "$1" == "" ]; then
+    echo "usage: gitvb-cherry-pick <branch> <commit>"
+    exit 1
+fi
+if [ "$2" == "" ]; then
+    echo "usage: gitvb-cherry-pick <branch> <commit>"
+    exit 1
+fi
+
+git fetch
+
+pickBranch="$1"
+commitHash="$2"
+
+if [ "`git show "$commitHash"`" == "" ]; then
+    echo ""
+    echo 'bad commit?'
+    echo ""
+    exit 2
+fi
+
+echo "create wip stash [..]"
+gitvb-wip cherry-pick
+echo "create wip stash [ok]"
+
+pickMe=false
+vbFilePath="$GITVB_HOME/$pickBranch.gitvb"
+if [ -f "$vbFilePath" ]; then
+    pickMe=true
+    echo "unpicked cherry pick target branch [..]"
+    gitvb-unpick "$pickBranch"
+    echo "unpicked cherry pick target branch [ok]"
+fi
+
+echo "checkout [..]"
+git checkout "$pickBranch"
+echo "checkout [ok]"
+
+echo "cherry-pick [..]"
+git cherry-pick "$commitHash"
+if [ "$?" != 0 ]; then
+    echo ""
+    echo ""
+    echo ""
+    echo "cherry-pick [fail!]"
+    echo ""
+    echo ""
+    echo ""
+else
+    echo "cherry-pick [ok]"
+fi
+
+echo "back to main [..]"
+git checkout "$MAIN_BRANCH"
+echo "back to main [ok]"
+
+if [ "$pickMe" == true ]; then
+    echo "repick [..]"
+    gitvb-pick "$pickBranch"
+    echo "repick [ok]"
+fi
+
+echo "undo wip stash [..]"
+gitvb-wip-undo cherry-pick
+echo "undo wip stash [ok]"
