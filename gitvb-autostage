@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+branch="$1"
+if [ "$branch" == "" ]; then
+    branch="`gitvb-determine-unstaged-branch`"
+fi
+
+toAdd="`gitvb-list-changed $branch`"
+
+set +e
+while IFS= read -r add; do
+    echo "* add $add"
+    git add "$add"
+done <<< "$toAdd"
+set -e
+
+gitvb-s
