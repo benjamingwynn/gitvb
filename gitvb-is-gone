@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+# Check if the branch name is provided
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <branch-name>"
+  exit 1
+fi
+
+remoteBranches=$(gitvb-remote-ls-all)
+branchName=$1
+
+if echo "$remoteBranches" | grep -q "^$branchName$"; then
+    exit 0
+else
+    echo "Branch '$branchName' has gone from the remote." >&2
+    exit 1
+fi
