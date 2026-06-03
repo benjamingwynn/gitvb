@@ -30,6 +30,10 @@ fi
 
 mkdir -p "$(dirname "$newVbFilePath")"
 
+# determine if remote is gone
+echo "pick: is gone?"
+gitvb-is-gone "$pickBranch"
+
 # we can only pick branches that are up to date
 echo "pick: is pickable?"
 gitvb-is-pickable $pickBranch

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -e
+
+GITVB_HOME="./.git/.gitvb-v0"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+
+if [ ! -z "$(git diff --staged)" ]; then
+    echo "there are staged changes. exiting."
+    exit 1
+fi
+
+if [ "$(git branch --show-current)" != "$MAIN_BRANCH" ]; then
+    echo "you are not on the main branch: $MAIN_BRANCH"
+    exit 1
+fi
+
+pickedBranches="$(gitvb-ls)"
+branches="$(git branch --format='%(refname:short)')"
+
+toDelete=""
+while IFS= read -r line; do
+    if [ -z "$line" ]; then
+        continue
+    fi
+    if [ "$line" == "$MAIN_BRANCH" ]; then
+        continue
+    fi
+    branchName=$(echo "$line" | grep -v '^origin/' || echo)
+    if [ -z "$branchName" ]; then
+        continue
+    fi
+    if echo "$pickedBranches" | grep -q "^$line$"; then
+        continue
+    fi
+    toDelete="$toDelete
+$branchName"
+done <<< "$branches"
+
+toDelete="${toDelete#$'\n'}"
+
+if [ -z "$toDelete" ]; then
+    echo "no unpicked branches to remove."
+    exit 0
+fi
+
+echo "will remove:"
+while IFS= read -r line; do
+    echo "  $line"
+done <<< "$toDelete"
+echo ""
+
+read -r -p "Are you sure you want to continue? [y/N] " response
+if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    echo "aborted."
+    exit 0
+fi
+
+echo ""
+while IFS= read -r line; do
+    gitvb-rm-unpicked "$line"
+done <<< "$toDelete"
+
+echo "done!"

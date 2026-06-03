@@ -31,7 +31,7 @@ fi
 echo "creating backup..."
 dir="/tmp/gitvb-backup/$rmBranch"
 mkdir -p "$dir"
-git format-patch origin/master..benjamin/training-sprint --progress -o "$dir"
+git format-patch origin/$MAIN_BRANCH..$rmBranch --progress -o "$dir"
 
 echo "deleting branch..."
 git branch -D "$rmBranch"
